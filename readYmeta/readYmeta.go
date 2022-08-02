@@ -6,11 +6,54 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 )
 
 func errcntrl(e error) {
 	if e != nil {
 		panic(e)
+	}
+}
+
+func read_json_branch(json_map map[string]interface{}) {
+	fmt.Println(" ")
+	fmt.Println("json_map")
+	fmt.Println(json_map)
+	fmt.Println(reflect.TypeOf(json_map))
+
+	for k, v := range json_map {
+		switch vv := v.(type) {
+		case string:
+			fmt.Println(k, "is string", vv)
+		case float64:
+			fmt.Println(k, "is float64", vv)
+		case []interface{}:
+			fmt.Println(k, "is an array:")
+			fmt.Println(reflect.TypeOf(k))
+			fmt.Println(reflect.TypeOf(v))
+			fmt.Println(reflect.TypeOf(vv))
+			read_array(vv)
+			for i, u := range vv {
+				fmt.Println(i, u)
+			}
+		default:
+			fmt.Println(k, "is of a type I don't know how to handle")
+		}
+	}
+}
+
+func read_array(jarr []interface{}) {
+	fmt.Println("->")
+	fmt.Println(reflect.TypeOf(jarr))
+	for i, u := range jarr {
+		fmt.Println("-->")
+		fmt.Println(i, u)
+		fmt.Println(reflect.TypeOf(i))
+		fmt.Println(reflect.TypeOf(u))
+		if reflect.TypeOf(u) == reflect.TypeOf(jarr) {
+			fmt.Println("XXX")
+		}
+
 	}
 }
 
@@ -30,24 +73,24 @@ func main() {
 	err2 := json.Unmarshal(json_file, &json_dat)
 	errcntrl(err2)
 	//create a dictionary of the json interface data
-	json_map := json_dat.(map[string]interface{})
+	fmt.Println(" ")
+	fmt.Println(" ")
+	fmt.Println(json_dat)
+	read_json_branch(json_dat.(map[string]interface{}))
 
-	for k, v := range json_map {
-		switch vv := v.(type) {
-		case string:
-			fmt.Println(k, "is string", vv)
-		case float64:
-			fmt.Println(k, "is float64", vv)
-		case []interface{}:
-			fmt.Println(k, "is an array:")
-			for i, u := range vv {
-				fmt.Println(i, u)
-			}
-		default:
-			fmt.Println(k, "is of a type I don't know how to handle")
-		}
-	}
+	fmt.Println(" ")
+	fmt.Println(" ")
+	fmt.Println(reflect.TypeOf(json_dat))
+	fmt.Println(json_dat)
+	fmt.Println(" ")
+	fmt.Println(reflect.TypeOf(json_dat.(map[string]interface{})))
+	fmt.Println(json_dat.(map[string]interface{}))
+
 }
+
+/*
+Funky GO template builder: https://mholt.github.io/json-to-go/
+*/
 
 /*
 func old_main_for_history() {
