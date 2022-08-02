@@ -1,0 +1,104 @@
+{
+    "links": [
+        {
+            "rel": "describedby", 
+            "href": "https://yoda.uu.nl/schemas/teclab-0/metadata.json"
+        }
+    ], 
+    "Discipline": [
+        "Paleomagnetic and magnetic data"
+    ], 
+    "Lab": [
+        "9cd562c216daa82792972a074a222c52"
+    ], 
+    "Additional_Lab": [
+        ""
+    ], 
+    "Version": "Version 1.0", 
+    "Language": "en - English", 
+    "Collected": {}, 
+    "GeoLocation": [
+        {
+            "geoLocationBox": {
+                "northBoundLatitude": 52.33493261437125, 
+                "westBoundLongitude": 4.868464056399105, 
+                "southBoundLatitude": 52.33238889216437, 
+                "eastBoundLongitude": 4.861896359994181
+            }, 
+            "Description_Temporal": {}
+        }
+    ], 
+    "Main_Setting": [
+        "tectonically defined setting"
+    ], 
+    "Process_Hazard": [
+        "Rifting"
+    ], 
+    "Geological_Structure": [
+        "lava flow"
+    ], 
+    "Geomorphical_Feature": [
+        "buried feature"
+    ], 
+    "Material": [
+        "Sand"
+    ], 
+    "Apparatus": [
+        "Earthquake simulator"
+    ], 
+    "Monitoring": [
+        "Kinetic Microfoft"
+    ], 
+    "Software": [
+        "Geomodeller (Intrepid Geoscience)"
+    ], 
+    "Measured_Property": [
+        "Shear modulus"
+    ], 
+    "Tag": [
+        ""
+    ], 
+    "Related_Datapackage": [
+        {
+            "Persistent_Identifier": {}
+        }
+    ], 
+    "Funding_Reference": [
+        {}
+    ], 
+    "Retention_Period": 10, 
+    "Creator": [
+        {
+            "Name": {
+                "Given_Name": "Peter", 
+                "Family_Name": "Vos"
+            }, 
+            "Affiliation": [
+                "Vrije Universiteit Amsterdam"
+            ], 
+            "Person_Identifier": [
+                {
+                    "Name_Identifier_Scheme": "ORCID", 
+                    "Name_Identifier": "0000-0002-5131-9340"
+                }
+            ]
+        }
+    ], 
+    "Contributor": [
+        {
+            "Name": {}, 
+            "Affiliation": [
+                "Vrije University Amsterdam"
+            ], 
+            "Person_Identifier": [
+                {}
+            ]
+        }
+    ], 
+    "License": "Creative Commons Attribution 4.0 International Public License", 
+    "Data_Access_Restriction": "Open - freely retrievable", 
+    "Title": "data one", 
+    "Description": "some description here", 
+    "Data_Type": "Dataset", 
+    "Data_Classification": "Basic"
+}
