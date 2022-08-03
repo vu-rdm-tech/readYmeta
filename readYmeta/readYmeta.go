@@ -3,6 +3,7 @@ readYmeta.go reading and converting Yoda metadata
 Author: Brett G. Olivier
 email: @bgoli
 licence: BSD 3 Clause
+version: 0.3
 (C) Brett G. Olivier, Vrije Universiteit Amsterdam, Amsterdam, The Netherlands, 2022
 */
 
@@ -13,7 +14,14 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+
+	"github.com/johnfercher/maroto/pkg/consts"
+	"github.com/johnfercher/maroto/pkg/pdf"
+	"github.com/johnfercher/maroto/pkg/props"
 )
+
+// Define global constants here?
+const _VERSION_ = "0.3"
 
 // Vanilla Yoda metadata struct
 type Yoda18Metadata struct {
@@ -161,7 +169,51 @@ func errcntrl(e error) {
 	}
 }
 
+func pdf_create_and_dump(fname string, sarr []string) {
+
+	// Do things
+
+	m := pdf.NewMaroto(consts.Portrait, consts.A4)
+	//m.SetBorder(true)
+
+	m.Row(10, func() {
+		m.Col(4, func() {
+			m.Text("Written by readYmeta, the Yoda Metadata converter - v"+_VERSION_, props.Text{
+				Top:         0,
+				Size:        16,
+				Extrapolate: true,
+			})
+		})
+		m.ColSpace(4)
+	})
+	// m.Row(10, func() {})
+	m.Line(10)
+
+	for idx, ele := range sarr {
+		fmt.Println("Index :", idx, " Element :", ele)
+		// pdf_write_row(m, fmt.Sprintln("Index :", idx, " Element :", ele))
+		pdf_write_row(m, fmt.Sprintln(ele))
+	}
+
+	err := m.OutputFileAndClose(fmt.Sprintf("%s.pdf", fname))
+	errcntrl(err)
+}
+
+func pdf_write_row(m pdf.Maroto, line string) {
+	m.Row(6, func() {
+		m.Col(4, func() {
+			m.Text(line, props.Text{
+				Top:         0,
+				Size:        10,
+				Extrapolate: true,
+			})
+		})
+		//m.ColSpace(12)
+	})
+}
+
 func main() {
+
 	msg := "Welcome to the Yoda metadata translator\n(C)Brett G. Olivier, Vrije Universiteit Amsterdam, 2022"
 	fmt.Println(msg)
 
@@ -194,6 +246,8 @@ func main() {
 	fmt.Println(reflect.TypeOf(basic_info_str))
 	fmt.Println(basic_info_str[0])
 
+	// lets play with dumping to PDF
+	pdf_create_and_dump("dumpfile", basic_info_str)
 }
 
 func get_basic_data(doc Yoda18Metadata) []string {
