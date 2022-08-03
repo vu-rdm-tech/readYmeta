@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 )
 
 // Vanilla Yoda metadata struct
@@ -185,13 +186,31 @@ func main() {
 	*/
 	// lets do something more useful
 	fmt.Printf("\n\n----------------\n\n")
-	fmt.Println(get_basic_info(json_dat))
+	var basic_info_str []string
+	basic_info_str = get_basic_data(json_dat)
+
+	// Random checks
+	fmt.Println(basic_info_str)
+	fmt.Println(reflect.TypeOf(basic_info_str))
+	fmt.Println(basic_info_str[0])
 
 }
 
-func get_basic_info(doc Yoda18Metadata) string {
-	var output string = ""
-	output += fmt.Sprintf("Description: %s\n", doc.Description)
+func get_basic_data(doc Yoda18Metadata) []string {
+	var output []string
+	output = append(output, fmt.Sprintf("Title: %s", doc.Title))
+	output = append(output, fmt.Sprintf("Description: %s", doc.Description))
+	output = append(output, fmt.Sprintf("Version: %s", doc.Version))
+	output = append(output, fmt.Sprintf("Licence: %s", doc.License))
+	output = append(output, fmt.Sprintf("Language: %s", doc.Language))
+	output = append(output, fmt.Sprintf("Rentention_Period: %d", doc.RetentionPeriod))
+	output = append(output, fmt.Sprintf("Data_Type: %s", doc.DataType))
+	output = append(output, fmt.Sprintf("Data_Access_Restriction: %s", doc.DataAccessRestriction))
+	output = append(output, fmt.Sprintf("Retention_Information: %s", doc.RetentionInformation))
+	output = append(output, fmt.Sprintf("Embargo_End_Date: %s", doc.EmbargoEndDate))
+	output = append(output, fmt.Sprintf("Data_Classification: %s", doc.DataClassification))
+	output = append(output, fmt.Sprintf("Collection_Name: %s", doc.CollectionName))
+	output = append(output, fmt.Sprintf("Remarks: %s", doc.Remarks))
 	return output
 }
 
