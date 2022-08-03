@@ -1,4 +1,10 @@
-// readYmeta.go
+/*
+readYmeta.go reading and converting Yoda metadata
+Author: Brett G. Olivier
+email: @bgoli
+licence: BSD 3 Clause
+(C) Brett G. Olivier, Vrije Universiteit Amsterdam, Amsterdam, The Netherlands, 2022
+*/
 
 package main
 
@@ -6,7 +12,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"reflect"
 )
 
 // Vanilla Yoda metadata struct
@@ -156,7 +161,7 @@ func errcntrl(e error) {
 }
 
 func main() {
-	msg := "Welcome to the Yoda metadata translator"
+	msg := "Welcome to the Yoda metadata translator\n(C)Brett G. Olivier, Vrije Universiteit Amsterdam, 2022"
 	fmt.Println(msg)
 
 	// read metadata file
@@ -172,10 +177,22 @@ func main() {
 	errcntrl(err2)
 
 	// print struct and explore new options
-	fmt.Println(" ")
-	fmt.Println(json_dat)
-	fmt.Println(reflect.TypeOf(json_dat))
-	fmt.Println(len(json_dat.Contributor))
+	/*
+		fmt.Println(" ")
+		fmt.Println(json_dat)
+		fmt.Println(reflect.TypeOf(json_dat))
+		fmt.Println(len(json_dat.Contributor))
+	*/
+	// lets do something more useful
+	fmt.Printf("\n\n----------------\n\n")
+	fmt.Println(get_basic_info(json_dat))
+
+}
+
+func get_basic_info(doc Yoda18Metadata) string {
+	var output string = ""
+	output += fmt.Sprintf("Description: %s\n", doc.Description)
+	return output
 }
 
 /*
