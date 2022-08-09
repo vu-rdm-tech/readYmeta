@@ -1,0 +1,94 @@
+{
+    "links": [
+        {
+            "rel": "describedby", 
+            "href": "https://yoda.uu.nl/schemas/default-1/metadata.json"
+        }
+    ], 
+    "Discipline": [
+        "Natural Sciences - Physical sciences (1.3)"
+    ], 
+    "Language": "en - English", 
+    "Collected": {
+        "Start_Date": "2020-12-01", 
+        "End_Date": "2022-05-02"
+    }, 
+    "Covered_Geolocation_Place": [
+        "Utrecht"
+    ], 
+    "Covered_Period": {}, 
+    "Tag": [
+        "Colloidal glass", 
+        "Microrheology", 
+        "Microswimmers"
+    ], 
+    "Related_Datapackage": [
+        {
+            "Persistent_Identifier": {
+                "Identifier_Scheme": "DOI", 
+                "Identifier": "10.24416/UU01-NXITLI"
+            }, 
+            "Relation_Type": "Continues: Continues this current dataset", 
+            "Title": "Autonomously probing viscoelasticity in disordered suspensions"
+        }
+    ], 
+    "Retention_Period": 10, 
+    "Data_Type": "Dataset", 
+    "Funding_Reference": [
+        {
+            "Funder_Name": " NWO Start-Up Grant", 
+            "Award_Number": "740.018.013"
+        }, 
+        {
+            "Funder_Name": " Deutsche Forschungsgemeinschaft", 
+            "Award_Number": "425217212"
+        }, 
+        {
+            "Funder_Name": " H2020 European Research Council", 
+            "Award_Number": " 693683"
+        }
+    ], 
+    "Creator": [
+        {
+            "Name": {
+                "Given_Name": "Meike", 
+                "Family_Name": "Bos"
+            }, 
+            "Affiliation": [
+                "Utrecht University"
+            ], 
+            "Person_Identifier": [
+                {
+                    "Name_Identifier_Scheme": "ORCID", 
+                    "Name_Identifier": " 0000-0002-1366-0951"
+                }
+            ]
+        }
+    ], 
+    "Contributor": [
+        {
+            "Name": {
+                "Given_Name": "Clara", 
+                "Family_Name": "Abaurrea Velasco"
+            }, 
+            "Affiliation": [
+                "Utrecht University"
+            ], 
+            "Person_Identifier": [
+                {
+                    "Name_Identifier_Scheme": "ORCID", 
+                    "Name_Identifier": " 0000-0002-1366-0951 "
+                }
+            ], 
+            "Contributor_Type": "Researcher"
+        }
+    ], 
+    "Data_Access_Restriction": "Open - freely retrievable", 
+    "Title": "Understanding Enhanced Rotational Dynamics of Active Probes in Rod Suspensions", 
+    "Description": "Data package accompanying the publication with the above title in Soft Matter [10.1039/d2sm00583b]. This package provides all the relevant information for numerically studying Active Brownian particles (APs) exhibiting enhanced rotational diffusion (ERD) in a quasi-two-dimensional suspension of colloidal rods. Activity couples AP-rod contacts to reorientation, with the variance therein leading to ERD. This ERD is captured by a a variant of the coupling used in our previous phenomenological modeling [10.1103/PhysRevLett.125.258002; and associated data package 10.24416/UU01-NXITLI].\n\nIn brief, this package contains the data required to reproduce the graphs for the simulations, as well as the simulation source code and analysis scripts required to process the raw simulation output. In each directory there are readme.txt files that describe the content and use of the elements contained therein, e.g., how to run various script to obtain the raw simulation data. The [simulation] directory contains C++ code for the generation of 2D rods-only systems, a passive probe in a rod suspension, and an active probe in a (dense) rod suspension. Using this source code, passive glassy background systems comprising polydisperse 2D spherocylinders can be produced, for which the particles interact via the Weeks-Chandler-Anderson potential. The system containing an AP is modelled similarly; the probe is included as a single disk-shaped particle that, when active, experiences a torque through its interaction with the spherocylinders. This enables the AP to experience ERD, which spikes when the variance of the number of contacts between the probe and the rods in its direct surrounding has a maximum, as described in the associated scientific publication. The directory [analysis] contains C++ codes for the analysis of the data generated using the simulation, such as the self-intermediate scattering functions, mean square displacements, raft and contact analysis, etc., that can be obtained from the raw particle coordinates. Lastly, the directory [data] provides the processed data (.dat files) and scripts (python and bash) to generate the figures in the main text and supplement.", 
+    "Version": "1.0", 
+    "Data_Classification": "Public", 
+    "License": "Creative Commons Attribution 4.0 International Public License", 
+    "Collection_Name": "Understanding Enhanced Rotational Dynamics of Active Probes in Rod Suspensions", 
+    "Remarks": "Updated the original metadata descriptor to meet publishing standards 05 August 2022"
+}

@@ -1,0 +1,85 @@
+{
+    "Discipline": [
+        "Natural Sciences - Earth and related environmental sciences (1.5)"
+    ], 
+    "Tag": [
+        "Groningen gas field", 
+        "Reservoir", 
+        "Model", 
+        "Petrel", 
+        "Geology", 
+        "Faults", 
+        "NAM", 
+        "EPOS-NL"
+    ], 
+    "Covered_Period": {
+        "Start_Date": "1965-01-01", 
+        "End_Date": "2020-10-01"
+    }, 
+    "Description": "Geological model and data of the Groningen gas field, the Netherlands, developed by the Nederlandse Aardolie Maatschappij (NAM) and distributed by the Dutch research infrastructure of solid earth sciences, EPOS-NL. The static model helps geoscientists to develop stratigraphic and structural understanding of the Groningen gas reservoir, allowing to move seamlessly from 2D maps to 3D models and so to provide accuracy throughout the exploration, development, and (post-)production stages. Before usage, please note the following points: \n\n• This model was developed in and is compatible with Petrel software, version 2018\n• The model has taken years of expert development. Please use only if you are a skilled Petrel user. \n• This model includes well log and seismic data that is also openly accessible on the NLOG webpage. \n• This data publication includes a RESCUE 3d grid data export of the Petrel model. The RESCUE data can be read by many open source software. \n• Please reference use of this data publication as: NAM (2020). Petrel geological model of the Groningen gas field, the Netherlands. Open access through EPOS-NL. Yoda data publication platform Utrecht University. https://doi.org/10.24416/UU01-1QH0MW \n• EPOS-NL takes genuine interest in which parties use the model. If you intend on using the model, please let us know by emailing to: info@epos-nl.nl • If you encounter problems in accessing the model, please contact EPOS-NL: info@epos-nl.nl \n• For technical questions relating to model use, please contact Dr. Fred Beekman at Utrecht University: fred.beekman@uu.nl", 
+    "Language": "en - English", 
+    "Title": "Petrel geological model of the Groningen gas field, the Netherlands", 
+    "Data_Classification": "Public", 
+    "Creator": [
+        {
+            "Affiliation": [
+                "Nederlandse Aardolie Maatschappij (NAM)"
+            ], 
+            "Name": {
+                "Family_Name": "Aardolie Maatschappij (NAM)", 
+                "Given_Name": "Nederlandse"
+            }
+        }
+    ], 
+    "links": [
+        {
+            "rel": "describedby", 
+            "href": "https://yoda.uu.nl/schemas/default-1/metadata.json"
+        }
+    ], 
+    "Covered_Geolocation_Place": [
+        "Groningen", 
+        "The Netherlands"
+    ], 
+    "Retention_Period": 100, 
+    "Version": "1", 
+    "Contributor": [
+        {
+            "Affiliation": [
+                "Utrecht University"
+            ], 
+            "Name": {
+                "Family_Name": "EPOS-NL", 
+                "Given_Name": ""
+            }, 
+            "Contributor_Type": "ContactPerson"
+        }, 
+        {
+            "Affiliation": [
+                "Utrecht University"
+            ], 
+            "Person_Identifier": [
+                {
+                    "Name_Identifier": "0000-0002-8455-999X", 
+                    "Name_Identifier_Scheme": "ORCID"
+                }
+            ], 
+            "Name": {
+                "Family_Name": "Beekman", 
+                "Given_Name": "Fred"
+            }, 
+            "Contributor_Type": "RelatedPerson"
+        }
+    ], 
+    "Collected": {
+        "Start_Date": "1965-01-01", 
+        "End_Date": "2020-10-01"
+    }, 
+    "Data_Access_Restriction": "Open - freely retrievable", 
+    "License": "Creative Commons Attribution 4.0 International Public License", 
+    "Funding_Reference": [
+        {
+            "Funder_Name": "Nederlandse Aardolie Maatschappij (NAM)"
+        }
+    ]
+}

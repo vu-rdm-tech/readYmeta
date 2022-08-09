@@ -1,0 +1,104 @@
+{
+    "Discipline": [
+        "Humanities - Languages and literature (6.2)"
+    ], 
+    "License": "Creative Commons Attribution-ShareAlike 4.0 International Public License", 
+    "Description": "This folder contains the updated version of a previously archived package with DOI: 10.24416/UU01-2SO9TE .\nIt contains all information regarding the experimental set-up, data, analysis, and publication of the experiment of Refining the Multiple‐Drivers Model: Minimal groups vs. Morality. More detailed information can be found in the readme.txt and in the paper \"Reading about us and them: Moral and but not minimal group effects on language-induced emotion\" by Björn 't Hart, Marijn Struiksma, Anton van Boxtel, & Jos J.A. van Berkum.", 
+    "Language": "en - English", 
+    "Title": "Reading about us and them:  Moral and but not minimal group effects on language-induced emotion", 
+    "Data_Classification": "Basic", 
+    "Creator": [
+        {
+            "Affiliation": [
+                "Utrecht University"
+            ], 
+            "Name": {
+                "Family_Name": "Struiksma", 
+                "Given_Name": "Marijn"
+            }, 
+            "Person_Identifier": [
+                {
+                    "Name_Identifier": "0000-0002-1166-1424", 
+                    "Name_Identifier_Scheme": "ORCID"
+                }
+            ]
+        }, 
+        {
+            "Affiliation": [
+                "Utrecht University"
+            ], 
+            "Name": {
+                "Family_Name": "'t Hart", 
+                "Given_Name": "Björn"
+            }, 
+            "Person_Identifier": [
+                {
+                    "Name_Identifier": "0000-0002-2384-9504", 
+                    "Name_Identifier_Scheme": "ORCID"
+                }
+            ]
+        }, 
+        {
+            "Affiliation": [
+                "Utrecht University"
+            ], 
+            "Name": {
+                "Family_Name": "van Berkum", 
+                "Given_Name": "Jos"
+            }, 
+            "Person_Identifier": [
+                {
+                    "Name_Identifier": "0000-0003-1673-4845", 
+                    "Name_Identifier_Scheme": "ORCID"
+                }
+            ]
+        }
+    ], 
+    "Related_Datapackage": [
+        {
+            "Persistent_Identifier": {
+                "Identifier_Scheme": "DOI", 
+                "Identifier": "10.24416/UU01-2SO9TE"
+            }, 
+            "Relation_Type": "IsNewVersionOf: Current datapackage is new version of", 
+            "Title": "Reading about us and them:  Moral and but not minimal group effects on language-induced emotion"
+        }
+    ], 
+    "links": [
+        {
+            "rel": "describedby", 
+            "href": "https://yoda.uu.nl/schemas/default-1/metadata.json"
+        }
+    ], 
+    "Contributor": [
+        {
+            "Affiliation": [
+                "Tilburg University"
+            ], 
+            "Person_Identifier": [
+                {
+                    "Name_Identifier": "0000-0001-5186-0703", 
+                    "Name_Identifier_Scheme": "ORCID"
+                }
+            ], 
+            "Name": {
+                "Family_Name": "van Boxtel", 
+                "Given_Name": "Anton"
+            }, 
+            "Contributor_Type": "Researcher"
+        }
+    ], 
+    "Retention_Period": 10, 
+    "Version": "2", 
+    "Collected": {
+        "Start_Date": "2016-06-01", 
+        "End_Date": "2016-06-30"
+    }, 
+    "Data_Access_Restriction": "Open - freely retrievable", 
+    "Funding_Reference": [
+        {
+            "Award_Number": "277-89-001", 
+            "Funder_Name": "NWO"
+        }
+    ]
+}

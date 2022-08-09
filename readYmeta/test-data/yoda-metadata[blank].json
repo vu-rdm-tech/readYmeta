@@ -1,0 +1,50 @@
+{
+    "links": [
+        {
+            "rel": "describedby", 
+            "href": "https://yoda.uu.nl/schemas/default-1/metadata.json"
+        }
+    ], 
+    "Language": "en - English", 
+    "Collected": {}, 
+    "Covered_Geolocation_Place": [
+        ""
+    ], 
+    "Covered_Period": {}, 
+    "Tag": [
+        ""
+    ], 
+    "Related_Datapackage": [
+        {
+            "Persistent_Identifier": {}
+        }
+    ], 
+    "Retention_Period": 10, 
+    "Data_Type": "Dataset", 
+    "Funding_Reference": [
+        {}
+    ], 
+    "Creator": [
+        {
+            "Name": {}, 
+            "Affiliation": [
+                "Vrije Universiteit"
+            ], 
+            "Person_Identifier": [
+                {}
+            ]
+        }
+    ], 
+    "Contributor": [
+        {
+            "Name": {}, 
+            "Affiliation": [
+                "Vrije Universiteit"
+            ], 
+            "Person_Identifier": [
+                {}
+            ]
+        }
+    ], 
+    "Data_Access_Restriction": "Restricted - available upon request"
+}
