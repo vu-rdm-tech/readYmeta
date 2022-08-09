@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"time"
 
@@ -158,10 +159,102 @@ type Yoda18MetadataV2 struct {
 	License               string `json:"License,omitempty"`
 }
 
+const DEBUG bool = true
+
+func main() {
+
+	msg := "readYmeta - (C)Brett G. Olivier, Vrije Universiteit Amsterdam, 2022"
+	fmt.Println(msg)
+	fmt.Println(" ")
+
+	// define input and output files
+	input_file_name, input_file_path, err1 := get_input_file_path_from_clargs()
+	errcntrl(err1)
+	output_file_name := input_file_name + ".pdf"
+	if DEBUG {
+		fmt.Println(input_file_name)
+		fmt.Println(input_file_path)
+		fmt.Println(output_file_name)
+	}
+
+	// read metadata file
+	json_file, err1 := os.ReadFile(input_file_name)
+	errcntrl(err1)
+
+	// print the file cast as string
+	if DEBUG {
+		fmt.Print(string(json_file))
+	}
+
+	// create metadata struct and fill it with file data
+	var json_dat Yoda18Metadata
+	err2 := json.Unmarshal(json_file, &json_dat)
+	errcntrl(err2)
+
+	// print struct and explore new options
+	/*
+		fmt.Println(" ")
+		fmt.Println(json_dat)
+		fmt.Println(reflect.TypeOf(json_dat))
+		fmt.Println(len(json_dat.Contributor))
+	*/
+	// lets do something more useful
+	if DEBUG {
+		fmt.Printf("\n\n----------------\n\n")
+	}
+	//var doc_text_basic []string
+	// var basic_info_str []string
+
+	doc_text_basic := get_basic_document_data(json_dat)
+	// basic_info_str = get_basic_mutable_data(json_dat)
+
+	// Random checks
+	if DEBUG {
+		fmt.Println(doc_text_basic)
+		fmt.Println(reflect.TypeOf(doc_text_basic))
+		fmt.Println(doc_text_basic[0])
+	}
+
+	// lets play with dumping to PDF
+	doc_array := doc_text_basic
+	// doc_array = append(simple_info_str, basic_info_str...)
+	pdf_create_and_dump(output_file_name, doc_array)
+}
+
 func errcntrl(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+func get_input_file_path_from_clargs() (string, string, error) {
+	var cDir string = ""
+	var err error = nil
+	var fname string
+
+	cDir, err = os.Getwd()
+	errcntrl(err)
+
+	if len(os.Args) > 1 {
+		fname = os.Args[1]
+	} else {
+		fmt.Println("Filename argument not provided, using default: yoda-metadata.json")
+		fname = "yoda-metadata.json"
+	}
+
+	input_file_path, err := filepath.Abs(filepath.Join(cDir, fname))
+	errcntrl(err)
+
+	//
+	_, err = os.Stat(input_file_path)
+	if os.IsNotExist(err) {
+		fmt.Println("Input file path does not exist:", input_file_path)
+	} else {
+		fmt.Println("Input file path exists:", input_file_path)
+		err = nil
+	}
+	return fname, input_file_path, err
+
 }
 
 func pdf_create_and_dump(fname string, sarr []string) {
@@ -186,7 +279,9 @@ func pdf_create_and_dump(fname string, sarr []string) {
 
 	//write the "document"
 	for idx, ele := range sarr {
-		fmt.Println("Index :", idx, " Element :", ele)
+		if DEBUG {
+			fmt.Println("Index :", idx, " Element :", ele)
+		}
 		// pdf_write_row(m, fmt.Sprintln("Index :", idx, " Element :", ele))
 		pdf_write_row(m, fmt.Sprintln(ele))
 	}
@@ -223,53 +318,6 @@ func pdf_write_row(m pdf.Maroto, line string) {
 		})
 		//m.ColSpace(12)
 	})
-}
-
-func main() {
-
-	msg := "Welcome to the Yoda metadata translator\n(C)Brett G. Olivier, Vrije Universiteit Amsterdam, 2022"
-	fmt.Println(msg)
-	const input_file_name = "yoda-metadata.json"
-	const output_file_name = input_file_name + ".pdf"
-
-	// read metadata file
-
-	json_file, err1 := os.ReadFile(input_file_name)
-	errcntrl(err1)
-
-	// print the file cast as string
-	fmt.Print(string(json_file))
-
-	// create metadata struct and fill it with file data
-	var json_dat Yoda18Metadata
-	err2 := json.Unmarshal(json_file, &json_dat)
-	errcntrl(err2)
-
-	// print struct and explore new options
-	/*
-		fmt.Println(" ")
-		fmt.Println(json_dat)
-		fmt.Println(reflect.TypeOf(json_dat))
-		fmt.Println(len(json_dat.Contributor))
-	*/
-	// lets do something more useful
-	fmt.Printf("\n\n----------------\n\n")
-	var doc_text_basic []string
-	// var basic_info_str []string
-
-	doc_text_basic = get_basic_document_data(json_dat)
-	// basic_info_str = get_basic_mutable_data(json_dat)
-
-	// Random checks
-	fmt.Println(doc_text_basic)
-	fmt.Println(reflect.TypeOf(doc_text_basic))
-	fmt.Println(doc_text_basic[0])
-
-	// lets play with dumping to PDF
-	var doc_array []string
-	doc_array = doc_text_basic
-	// doc_array = append(simple_info_str, basic_info_str...)
-	pdf_create_and_dump(output_file_name, doc_array)
 }
 
 func get_creators(doc Yoda18Metadata) []string {
