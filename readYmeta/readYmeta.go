@@ -271,29 +271,17 @@ func get_input_file_path_from_clargs() (string, string, error) {
 func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string) pdf.Maroto {
 
 	var colwidth uint = 12
-	var rowheight float64 = 6
-
-	// doc.Row(rowheight, func() {
-	// 	doc.Col(colwidth, func() {
-	// 		doc.Text(fmt.Sprintf("\"%s\" metadata report (readYmeta v%s)", fname, _VERSION_), props.Text{
-	// 			Top:         0,
-	// 			Size:        16,
-	// 			Extrapolate: true,
-	// 		})
-	// 	})
-	// 	doc.ColSpace(4)
-	// })
-	// // m.Row(10, func() {})
-	// doc.Line(10)
+	var rowheight float64 = 4
 
 	pdf_write_header(doc, fmt.Sprintf("\"%s\" metadata report (readYmeta v%s)", fname, _VERSION_), rowheight, colwidth)
 	pdf_write_row(doc, "Tag", rowheight, colwidth)
 	pdf_write_list(doc, data.Tag, rowheight, colwidth)
+	pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth)
 
 	return doc
 }
 
-// New style PDFreportwriter row writer
+// New style PDFreportwriter header writer
 func pdf_write_header(m pdf.Maroto, line string, rowheight float64, colwidth uint) {
 	m.Row(rowheight, func() {
 		m.Col(colwidth, func() {
@@ -310,11 +298,12 @@ func pdf_write_header(m pdf.Maroto, line string, rowheight float64, colwidth uin
 
 // New style PDFreportwriter row writer
 func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint) {
+	var fontsize float64 = 10
 	m.Row(rowheight, func() {
 		m.Col(colwidth, func() {
 			m.Text(line, props.Text{
 				Top:         0,
-				Size:        10,
+				Size:        fontsize,
 				Extrapolate: false,
 			})
 		})
@@ -323,20 +312,49 @@ func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint) 
 
 // New style PDFreportwriter list writer
 func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth uint) {
+	var fontsize float64 = 9
+	var indent uint = 1
+
 	for line := range lines {
 		// fmt.Printf("%s\n", lines[line])
 		m.Row(rowheight, func() {
-			m.Col(1, func() {
+			m.Col(indent, func() {
 				m.Text(" ", props.Text{
 					Top:         0,
-					Size:        8,
+					Size:        fontsize,
 					Extrapolate: false,
 				})
 			})
-			m.Col(colwidth-1, func() {
+			m.Col(colwidth-indent, func() {
 				m.Text(lines[line], props.Text{
 					Top:         0,
-					Size:        8,
+					Size:        fontsize,
+					Extrapolate: false,
+				})
+			})
+		})
+	}
+}
+
+// New style PDFreportwriter sublevel 1 list writer
+func pdf_write_list_sub1(m pdf.Maroto, lines []string, rowheight float64, colwidth uint) {
+	var fontsize float64 = 9
+	var indent uint = 2
+
+	for line := range lines {
+		// fmt.Printf("%s\n", lines[line])
+		m.Row(rowheight, func() {
+			m.Col(indent, func() {
+				m.Text(" ", props.Text{
+					Top:         0,
+					Size:        fontsize,
+					Extrapolate: false,
+				})
+			})
+			m.Col(colwidth-indent, func() {
+				m.Text(lines[line], props.Text{
+					Top:         0,
+					Size:        fontsize,
 					Extrapolate: false,
 				})
 			})
