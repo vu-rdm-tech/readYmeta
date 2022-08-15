@@ -163,7 +163,7 @@ type Yoda18MetadataV2 struct {
 const DEBUG bool = false
 
 const fontsize float64 = 10
-const listbullet string = " "
+const indentsymb string = " "
 const minRGB8Bytes = 0
 const maxRGB8Bytes = 255
 
@@ -283,6 +283,14 @@ func pdfBlack() color.Color {
 	}
 }
 
+func pdfOrange() color.Color {
+	return color.Color{
+		Red:   255,
+		Green: 165,
+		Blue:  0,
+	}
+}
+
 func get_input_file_path_from_clargs() (string, string, error) {
 	var cDir string = ""
 	var err error = nil
@@ -318,18 +326,24 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 
 	var colwidth uint = 12
 	var rowheight float64 = 4
+	var textblock_divider float64 = 20
 
 	pdf_write_header(doc, fmt.Sprintf("\"%s\" metadata report (readYmeta v%s)", fname, _VERSION_), rowheight, colwidth)
 	pdf_write_row(doc, "Title", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_row(doc, data.Title, rowheight, colwidth, consts.Normal, pdfBlack())
 	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
 	pdf_write_row(doc, "Description", rowheight, colwidth, consts.Bold, pdfBlack())
-	pdf_write_row(doc, data.Description, rowheight, colwidth, consts.Normal, pdfBlack())
+	if float64(len(data.Description))/textblock_divider > rowheight {
+		pdf_write_row(doc, data.Description, float64(len(data.Description))/textblock_divider, colwidth, consts.Normal, pdfBlack())
+	} else {
+		pdf_write_row(doc, data.Description, rowheight, colwidth, consts.Normal, pdfOrange())
+	}
 	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
-	pdf_write_row(doc, "Tag", rowheight, colwidth, consts.Bold, pdfBlack())
+	pdf_write_row(doc, "Tags", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_list(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
 	pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
 	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_creators(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
 
 	return doc
 }
@@ -351,7 +365,6 @@ func pdf_write_header(m pdf.Maroto, line string, rowheight float64, colwidth uin
 
 // New style PDFreportwriter row writer
 func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
-
 	m.Row(rowheight, func() {
 		m.Col(colwidth, func() {
 			m.Text(line, props.Text{
@@ -365,18 +378,51 @@ func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint, 
 	})
 }
 
+// New style PDFreportwriter row writer
+func pdf_write_row_indent(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color, indent uint) {
+	if line == "" || line == " " {
+		textcolour = pdfRed()
+	}
+
+	m.Row(rowheight, func() {
+		m.Col(indent, func() {
+			m.Text(indentsymb, props.Text{
+				Top:         0,
+				Size:        fontsize - 1,
+				Extrapolate: false,
+				Style:       fontstyle,
+				Color:       textcolour,
+			})
+		})
+		m.Col(colwidth-indent, func() {
+			m.Text(line, props.Text{
+				Top:         0,
+				Size:        fontsize - 1,
+				Extrapolate: false,
+				Style:       fontstyle,
+				Color:       textcolour,
+			})
+		})
+	})
+
+}
+
 // New style PDFreportwriter list writer
 func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	var indent uint = 1
 
 	for line := range lines {
+		if lines[line] == "" || lines[line] == " " {
+			textcolour = pdfRed()
+		}
 		// fmt.Printf("%s\n", lines[line])
 		m.Row(rowheight, func() {
 			m.Col(indent, func() {
-				m.Text(listbullet, props.Text{
+				m.Text(indentsymb, props.Text{
 					Top:         0,
 					Size:        fontsize - 1,
 					Extrapolate: false,
+					Style:       fontstyle,
 					Color:       textcolour,
 				})
 			})
@@ -385,6 +431,7 @@ func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth ui
 					Top:         0,
 					Size:        fontsize - 1,
 					Extrapolate: false,
+					Style:       fontstyle,
 					Color:       textcolour,
 				})
 			})
@@ -397,10 +444,13 @@ func pdf_write_list_sub1(m pdf.Maroto, lines []string, rowheight float64, colwid
 	var indent uint = 2
 
 	for line := range lines {
+		if lines[line] == "" || lines[line] == " " {
+			textcolour = pdfRed()
+		}
 		// fmt.Printf("%s\n", lines[line])
 		m.Row(rowheight, func() {
 			m.Col(indent, func() {
-				m.Text(listbullet, props.Text{
+				m.Text(indentsymb, props.Text{
 					Top:         0,
 					Size:        fontsize - 1,
 					Extrapolate: false,
@@ -420,6 +470,26 @@ func pdf_write_list_sub1(m pdf.Maroto, lines []string, rowheight float64, colwid
 		})
 	}
 }
+
+func pdf_write_creators(m pdf.Maroto, data Yoda18Metadata, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
+	var ind1 uint = 1
+	// var ind2 uint = 2
+	pdf_write_row(m, "Creators", rowheight, colwidth, consts.Bold, pdfBlack())
+	for i := range data.Creator {
+		pdf_write_row(m, fmt.Sprintf("%s %s", data.Creator[i].Name.GivenName, data.Creator[i].Name.FamilyName), rowheight, colwidth, consts.Normal, pdfBlack())
+		for j := range data.Creator[i].PersonIdentifier {
+			pdf_write_row_indent(m, data.Creator[i].Affiliation[j], rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+		}
+		for k := range data.Creator[i].Affiliation {
+			pdf_write_row_indent(m, fmt.Sprintf("(%s) %s", data.Creator[i].PersonIdentifier[k].NameIdentifierScheme, data.Creator[i].PersonIdentifier[k].NameIdentifier),
+				rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+		}
+	}
+}
+
+// pdf_write_row(doc, "Tag", rowheight, colwidth, consts.Bold, pdfBlack())
+// pdf_write_list(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
+// pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
 
 // This is an old function which generates "formatted" strings as output
 func pdf_create_and_dump(fname string, sarr []string) {
