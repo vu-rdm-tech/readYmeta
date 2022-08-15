@@ -17,13 +17,14 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/johnfercher/maroto/pkg/color"
 	"github.com/johnfercher/maroto/pkg/consts"
 	"github.com/johnfercher/maroto/pkg/pdf"
 	"github.com/johnfercher/maroto/pkg/props"
 )
 
 // Define global constants here?
-const _VERSION_ = "0.6.alpha"
+const _VERSION_ = "0.6.5.alpha"
 
 // Vanilla Yoda metadata struct
 type Yoda18Metadata struct {
@@ -161,8 +162,12 @@ type Yoda18MetadataV2 struct {
 
 const DEBUG bool = false
 
-func main() {
+const fontsize float64 = 10
+const listbullet string = " "
+const minRGB8Bytes = 0
+const maxRGB8Bytes = 255
 
+func main() {
 	msg := "readYmeta - (C)Brett G. Olivier, Vrije Universiteit Amsterdam, 2022"
 	fmt.Println(msg)
 	fmt.Println(" ")
@@ -226,6 +231,11 @@ func main() {
 
 	doc = generate_pdf_report_basic(json_dat, doc, input_file_name)
 
+	pdf_write_row(doc, "I am some BLACK coloured TEXT!", 12, 4, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "I am some BLUE coloured TEXT!", 12, 4, consts.Normal, pdfBlue())
+	pdf_write_row(doc, "I am some GREEN coloured TEXT!", 12, 4, consts.Normal, pdfGreen())
+	pdf_write_row(doc, "I am some RED coloured TEXT!", 12, 4, consts.Normal, pdfRed())
+
 	err := doc.OutputFileAndClose(fmt.Sprintf("%s", "new_form.pdf"))
 	errcntrl(err)
 
@@ -234,6 +244,42 @@ func main() {
 func errcntrl(e error) {
 	if e != nil {
 		panic(e)
+	}
+}
+
+// Maroto PDF color defintions
+func pdfRed() color.Color {
+	return color.Color{
+		Red:   maxRGB8Bytes,
+		Green: minRGB8Bytes,
+		Blue:  minRGB8Bytes,
+	}
+}
+
+// Maroto PDF color defintions
+func pdfGreen() color.Color {
+	return color.Color{
+		Red:   minRGB8Bytes,
+		Green: maxRGB8Bytes,
+		Blue:  minRGB8Bytes,
+	}
+}
+
+// Maroto PDF color defintions
+func pdfBlue() color.Color {
+	return color.Color{
+		Red:   minRGB8Bytes,
+		Green: minRGB8Bytes,
+		Blue:  maxRGB8Bytes,
+	}
+}
+
+// Maroto PDF color defintions
+func pdfBlack() color.Color {
+	return color.Color{
+		Red:   minRGB8Bytes,
+		Green: minRGB8Bytes,
+		Blue:  minRGB8Bytes,
 	}
 }
 
@@ -274,9 +320,16 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 	var rowheight float64 = 4
 
 	pdf_write_header(doc, fmt.Sprintf("\"%s\" metadata report (readYmeta v%s)", fname, _VERSION_), rowheight, colwidth)
-	pdf_write_row(doc, "Tag", rowheight, colwidth)
-	pdf_write_list(doc, data.Tag, rowheight, colwidth)
-	pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth)
+	pdf_write_row(doc, "Title", rowheight, colwidth, consts.Bold, pdfBlack())
+	pdf_write_row(doc, data.Title, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "Description", rowheight, colwidth, consts.Bold, pdfBlack())
+	pdf_write_row(doc, data.Description, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "Tag", rowheight, colwidth, consts.Bold, pdfBlack())
+	pdf_write_list(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
 
 	return doc
 }
@@ -297,39 +350,42 @@ func pdf_write_header(m pdf.Maroto, line string, rowheight float64, colwidth uin
 }
 
 // New style PDFreportwriter row writer
-func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint) {
-	var fontsize float64 = 10
+func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
+
 	m.Row(rowheight, func() {
 		m.Col(colwidth, func() {
 			m.Text(line, props.Text{
 				Top:         0,
 				Size:        fontsize,
 				Extrapolate: false,
+				Style:       fontstyle,
+				Color:       textcolour,
 			})
 		})
 	})
 }
 
 // New style PDFreportwriter list writer
-func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth uint) {
-	var fontsize float64 = 9
+func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	var indent uint = 1
 
 	for line := range lines {
 		// fmt.Printf("%s\n", lines[line])
 		m.Row(rowheight, func() {
 			m.Col(indent, func() {
-				m.Text(" ", props.Text{
+				m.Text(listbullet, props.Text{
 					Top:         0,
-					Size:        fontsize,
+					Size:        fontsize - 1,
 					Extrapolate: false,
+					Color:       textcolour,
 				})
 			})
 			m.Col(colwidth-indent, func() {
 				m.Text(lines[line], props.Text{
 					Top:         0,
-					Size:        fontsize,
+					Size:        fontsize - 1,
 					Extrapolate: false,
+					Color:       textcolour,
 				})
 			})
 		})
@@ -337,25 +393,28 @@ func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth ui
 }
 
 // New style PDFreportwriter sublevel 1 list writer
-func pdf_write_list_sub1(m pdf.Maroto, lines []string, rowheight float64, colwidth uint) {
-	var fontsize float64 = 9
+func pdf_write_list_sub1(m pdf.Maroto, lines []string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	var indent uint = 2
 
 	for line := range lines {
 		// fmt.Printf("%s\n", lines[line])
 		m.Row(rowheight, func() {
 			m.Col(indent, func() {
-				m.Text(" ", props.Text{
+				m.Text(listbullet, props.Text{
 					Top:         0,
-					Size:        fontsize,
+					Size:        fontsize - 1,
 					Extrapolate: false,
+					Style:       fontstyle,
+					Color:       textcolour,
 				})
 			})
 			m.Col(colwidth-indent, func() {
 				m.Text(lines[line], props.Text{
 					Top:         0,
-					Size:        fontsize,
+					Size:        fontsize - 1,
 					Extrapolate: false,
+					Style:       fontstyle,
+					Color:       textcolour,
 				})
 			})
 		})
@@ -392,7 +451,7 @@ func pdf_create_and_dump(fname string, sarr []string) {
 			fmt.Println("Index :", idx, " Element :", ele)
 		}
 		// pdf_write_row(m, fmt.Sprintln("Index :", idx, " Element :", ele))
-		pdf_write_row(m, fmt.Sprintln(ele), rowheight, colwidth)
+		pdf_write_row(m, fmt.Sprintln(ele), rowheight, colwidth, consts.Normal, pdfBlack())
 	}
 
 	run_time := time.Now()
