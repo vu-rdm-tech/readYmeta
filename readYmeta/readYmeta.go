@@ -168,8 +168,10 @@ const minRGB8Bytes = 0
 const maxRGB8Bytes = 255
 
 func main() {
+
 	msg := "readYmeta - (C)Brett G. Olivier, Vrije Universiteit Amsterdam, 2022"
 	fmt.Println(msg)
+	// fmt.Println()
 	fmt.Println(" ")
 
 	// define input and output files
@@ -228,6 +230,7 @@ func main() {
 	//// New way of doing things where we write the document directly
 	doc := pdf.NewMaroto(consts.Portrait, consts.A4)
 	//m.SetBorder(true)
+	doc.SetPageMargins(10, 10, 10)
 
 	doc = generate_pdf_report_basic(json_dat, doc, input_file_name)
 
@@ -323,12 +326,13 @@ func get_input_file_path_from_clargs() (string, string, error) {
 
 // New style PDFreportwriter, writes basic metadata
 func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string) pdf.Maroto {
-
+	var ctime = time.Now().String()
 	var colwidth uint = 12
 	var rowheight float64 = 4
 	var textblock_divider float64 = 20
 
-	pdf_write_header(doc, fmt.Sprintf("\"%s\" metadata report (readYmeta v%s)", fname, _VERSION_), rowheight, colwidth)
+	pdf_write_header(doc, fmt.Sprintf("\"%s\" metadata report", fname), rowheight, colwidth)
+	pdf_write_footer(doc, fmt.Sprintf("\"%s\" metadata report generated on %s by readYmeta v%s", fname, ctime, _VERSION_), rowheight, colwidth)
 	pdf_write_row(doc, "Title", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_row(doc, data.Title, rowheight, colwidth, consts.Normal, pdfBlack())
 	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
@@ -344,23 +348,41 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 	pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
 	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
 	pdf_write_creators(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_contributors(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
 
 	return doc
 }
 
 // New style PDFreportwriter header writer
 func pdf_write_header(m pdf.Maroto, line string, rowheight float64, colwidth uint) {
-	m.Row(rowheight, func() {
-		m.Col(colwidth, func() {
-			m.Text(line, props.Text{
-				Top:         0,
-				Size:        16,
-				Extrapolate: true,
+	m.RegisterHeader(func() {
+		m.Row(rowheight, func() {
+			m.Col(colwidth, func() {
+				m.Text(line, props.Text{
+					Top:         0,
+					Size:        14,
+					Extrapolate: true,
+				})
+			})
+			m.ColSpace(4)
+		})
+		m.Line(10)
+	})
+}
+
+func pdf_write_footer(m pdf.Maroto, line string, rowheight float64, colwidth uint) {
+	m.RegisterFooter(func() {
+		m.Row(20, func() {
+			m.Col(12, func() {
+				m.Text(line, props.Text{
+					Top:   20,
+					Style: consts.Italic,
+					Size:  6,
+					Align: consts.Left,
+				})
 			})
 		})
-		m.ColSpace(4)
 	})
-	m.Line(10)
 }
 
 // New style PDFreportwriter row writer
@@ -404,7 +426,6 @@ func pdf_write_row_indent(m pdf.Maroto, line string, rowheight float64, colwidth
 			})
 		})
 	})
-
 }
 
 // New style PDFreportwriter list writer
@@ -477,11 +498,28 @@ func pdf_write_creators(m pdf.Maroto, data Yoda18Metadata, rowheight float64, co
 	pdf_write_row(m, "Creators", rowheight, colwidth, consts.Bold, pdfBlack())
 	for i := range data.Creator {
 		pdf_write_row(m, fmt.Sprintf("%s %s", data.Creator[i].Name.GivenName, data.Creator[i].Name.FamilyName), rowheight, colwidth, consts.Normal, pdfBlack())
-		for j := range data.Creator[i].PersonIdentifier {
+		for j := range data.Creator[i].Affiliation {
 			pdf_write_row_indent(m, data.Creator[i].Affiliation[j], rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
 		}
-		for k := range data.Creator[i].Affiliation {
+		for k := range data.Creator[i].PersonIdentifier {
 			pdf_write_row_indent(m, fmt.Sprintf("(%s) %s", data.Creator[i].PersonIdentifier[k].NameIdentifierScheme, data.Creator[i].PersonIdentifier[k].NameIdentifier),
+				rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+		}
+	}
+}
+
+func pdf_write_contributors(m pdf.Maroto, data Yoda18Metadata, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
+	var ind1 uint = 1
+	// var ind2 uint = 2
+	pdf_write_row(m, "Contributors", rowheight, colwidth, consts.Bold, pdfBlack())
+	for i := range data.Contributor {
+		pdf_write_row(m, fmt.Sprintf("%s %s", data.Contributor[i].Name.GivenName, data.Contributor[i].Name.FamilyName), rowheight, colwidth, consts.Normal, pdfBlack())
+		pdf_write_row_indent(m, fmt.Sprintf("%s", data.Contributor[i].ContributorType), rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+		for j := range data.Creator[i].Affiliation {
+			pdf_write_row_indent(m, data.Contributor[i].Affiliation[j], rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+		}
+		for k := range data.Creator[i].PersonIdentifier {
+			pdf_write_row_indent(m, fmt.Sprintf("(%s) %s", data.Contributor[i].PersonIdentifier[k].NameIdentifierScheme, data.Contributor[i].PersonIdentifier[k].NameIdentifier),
 				rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
 		}
 	}
