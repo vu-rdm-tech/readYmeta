@@ -333,9 +333,11 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 
 	pdf_write_header(doc, fmt.Sprintf("\"%s\" metadata report", fname), rowheight, colwidth)
 	pdf_write_footer(doc, fmt.Sprintf("\"%s\" metadata report generated on %s by readYmeta v%s", fname, ctime, _VERSION_), rowheight, colwidth)
+
 	pdf_write_row(doc, "Title", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_row(doc, data.Title, rowheight, colwidth, consts.Normal, pdfBlack())
 	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+
 	pdf_write_row(doc, "Description", rowheight, colwidth, consts.Bold, pdfBlack())
 	if float64(len(data.Description))/textblock_divider > rowheight {
 		pdf_write_row(doc, data.Description, float64(len(data.Description))/textblock_divider, colwidth, consts.Normal, pdfBlack())
@@ -343,12 +345,37 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 		pdf_write_row(doc, data.Description, rowheight, colwidth, consts.Normal, pdfOrange())
 	}
 	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+
 	pdf_write_row(doc, "Tags", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_list(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
-	pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
+	// pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
 	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+
 	pdf_write_creators(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+
 	pdf_write_contributors(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+
+	pdf_write_row(doc, "Disciplines", rowheight, colwidth, consts.Bold, pdfBlack())
+	pdf_write_list(doc, data.Discipline, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+
+	pdf_write_row(doc, "Collected", rowheight, colwidth, consts.Bold, pdfBlack())
+	pdf_write_row_tuple_indent(doc, "StartDate", data.Collected.StartDate, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
+	pdf_write_row_tuple_indent(doc, "EndDate", data.Collected.EndDate, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+
+	pdf_write_row(doc, "Covered Period", rowheight, colwidth, consts.Bold, pdfBlack())
+	pdf_write_row_tuple_indent(doc, "StartDate", data.CoveredPeriod.StartDate, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
+	pdf_write_row_tuple_indent(doc, "EndDate", data.CoveredPeriod.EndDate, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+
+	pdf_write_funding(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+
+	pdf_write_related(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
 
 	return doc
 }
@@ -428,6 +455,47 @@ func pdf_write_row_indent(m pdf.Maroto, line string, rowheight float64, colwidth
 	})
 }
 
+// New style PDFreportwriter row writer
+func pdf_write_row_tuple_indent(m pdf.Maroto, line1 string, line2 string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color, indent uint) {
+	if line2 == "" || line2 == " " {
+		textcolour = pdfRed()
+	}
+
+	m.Row(rowheight, func() {
+		if indent == 0 {
+			indent = 1
+		} else {
+			m.Col(indent, func() {
+				m.Text("", props.Text{
+					Top:         0,
+					Size:        fontsize,
+					Extrapolate: false,
+					Style:       fontstyle,
+					Color:       textcolour,
+				})
+			})
+		}
+		m.Col(indent+1, func() {
+			m.Text(line1, props.Text{
+				Top:         0,
+				Size:        fontsize,
+				Extrapolate: false,
+				Style:       fontstyle,
+				Color:       textcolour,
+			})
+		})
+		m.Col(colwidth-indent-1, func() {
+			m.Text(line2, props.Text{
+				Top:         0,
+				Size:        fontsize,
+				Extrapolate: false,
+				Style:       fontstyle,
+				Color:       textcolour,
+			})
+		})
+	})
+}
+
 // New style PDFreportwriter list writer
 func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	var indent uint = 1
@@ -435,6 +503,8 @@ func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth ui
 	for line := range lines {
 		if lines[line] == "" || lines[line] == " " {
 			textcolour = pdfRed()
+		} else {
+			textcolour = pdfBlack()
 		}
 		// fmt.Printf("%s\n", lines[line])
 		m.Row(rowheight, func() {
@@ -467,6 +537,8 @@ func pdf_write_list_sub1(m pdf.Maroto, lines []string, rowheight float64, colwid
 	for line := range lines {
 		if lines[line] == "" || lines[line] == " " {
 			textcolour = pdfRed()
+		} else {
+			textcolour = pdfBlack()
 		}
 		// fmt.Printf("%s\n", lines[line])
 		m.Row(rowheight, func() {
@@ -515,13 +587,37 @@ func pdf_write_contributors(m pdf.Maroto, data Yoda18Metadata, rowheight float64
 	for i := range data.Contributor {
 		pdf_write_row(m, fmt.Sprintf("%s %s", data.Contributor[i].Name.GivenName, data.Contributor[i].Name.FamilyName), rowheight, colwidth, consts.Normal, pdfBlack())
 		pdf_write_row_indent(m, fmt.Sprintf("%s", data.Contributor[i].ContributorType), rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
-		for j := range data.Creator[i].Affiliation {
+		for j := range data.Contributor[i].Affiliation {
 			pdf_write_row_indent(m, data.Contributor[i].Affiliation[j], rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
 		}
-		for k := range data.Creator[i].PersonIdentifier {
+		for k := range data.Contributor[i].PersonIdentifier {
 			pdf_write_row_indent(m, fmt.Sprintf("(%s) %s", data.Contributor[i].PersonIdentifier[k].NameIdentifierScheme, data.Contributor[i].PersonIdentifier[k].NameIdentifier),
 				rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
 		}
+	}
+}
+
+// new function for writing funders
+func pdf_write_funding(m pdf.Maroto, data Yoda18Metadata, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
+	pdf_write_row(m, "Funding references", rowheight, colwidth, consts.Bold, pdfBlack())
+	for i := range data.FundingReference {
+		pdf_write_row_tuple_indent(m, data.FundingReference[i].FunderName, data.FundingReference[i].AwardNumber, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
+	}
+}
+
+//new functions for writing related data packages
+func pdf_write_related(m pdf.Maroto, data Yoda18Metadata, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
+	pdf_write_row(m, "Related datapackages", rowheight, colwidth, consts.Bold, pdfBlack())
+	for i := range data.RelatedDatapackage {
+		pdf_write_row(m, data.RelatedDatapackage[i].RelationType, rowheight, colwidth, consts.Normal, pdfBlack())
+		if data.RelatedDatapackage[i].PersistentIdentifier.IdentifierScheme == "" {
+			pdf_write_row_indent(m, "(string)"+data.RelatedDatapackage[i].PersistentIdentifier.Identifier, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
+		} else {
+			pdf_write_row_indent(m, "("+data.RelatedDatapackage[i].PersistentIdentifier.IdentifierScheme+") "+data.RelatedDatapackage[i].PersistentIdentifier.Identifier, rowheight,
+				colwidth, consts.Normal, pdfBlack(), 1)
+		}
+		pdf_write_row_indent(m, data.RelatedDatapackage[i].Title, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
+
 	}
 }
 
