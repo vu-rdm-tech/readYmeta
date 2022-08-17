@@ -3,7 +3,7 @@ readYmeta.go reading and converting Yoda metadata
 Author: Brett G. Olivier
 email: @bgoli
 licence: BSD 3 Clause
-version: 0.7-alpha
+version: 0.7-beta
 (C) Brett G. Olivier, Vrije Universiteit Amsterdam, Amsterdam, The Netherlands, 2022
 */
 
@@ -23,7 +23,7 @@ import (
 )
 
 // Define global constants here?
-const _VERSION_ = "0.7-alpha"
+const _VERSION_ = "0.7-beta"
 
 // Vanilla Yoda metadata struct
 type Yoda18Metadata struct {
@@ -166,6 +166,8 @@ const nullstring string = "<empty>"
 const minRGB8Bytes = 0
 const maxRGB8Bytes = 255
 
+var ERROR_COUNT uint = 0
+
 func main() {
 
 	msg := "readYmeta - (C)Brett G. Olivier, Vrije Universiteit Amsterdam, 2022"
@@ -197,6 +199,7 @@ func main() {
 	err2 := json.Unmarshal(json_file, &json_dat)
 	errcntrl(err2)
 
+	ERROR_COUNT = 0
 	// print struct and explore new options
 	/*
 		fmt.Println(" ")
@@ -299,6 +302,13 @@ func pdfOrange() color.Color {
 	}
 }
 
+// Maroto PDF color defintions
+func pdfErrorColour() color.Color {
+	// return pdfRed()
+	ERROR_COUNT = ERROR_COUNT + 1
+	return pdfBlue()
+}
+
 func get_input_file_path_from_clargs() (string, string, error) {
 	var cDir string = ""
 	var err error = nil
@@ -391,6 +401,13 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 	pdf_write_labelled_row(doc, "Retention Information", data.RetentionInformation, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 	pdf_write_labelled_row(doc, "Embargo EndDate", data.EmbargoEndDate, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 	pdf_write_labelled_row(doc, "Remarks", data.Remarks, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	if ERROR_COUNT > 0 {
+		pdf_write_empty_row(doc, 20, colwidth)
+		doc.Line(10)
+
+		pdf_write_labelled_row(doc, "readYmeta diagnostics", fmt.Sprintf(" - %d warnings were generated, please check for missing (optional) information.",
+			ERROR_COUNT), rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	}
 
 	return doc
 }
@@ -430,7 +447,7 @@ func pdf_write_footer(m pdf.Maroto, line string, rowheight float64, colwidth uin
 // New style PDFreportwriter row writer
 func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	if line == "" || line == " " {
-		textcolour = pdfRed()
+		textcolour = pdfErrorColour()
 		line = nullstring
 	}
 	m.Row(rowheight, func() {
@@ -461,7 +478,7 @@ func pdf_write_empty_row(m pdf.Maroto, rowheight float64, colwidth uint) {
 // New style PDFreportwriter row writer
 func pdf_write_row_indent(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color, indent uint) {
 	if line == "" || line == " " {
-		textcolour = pdfRed()
+		textcolour = pdfErrorColour()
 		line = nullstring
 	}
 
@@ -490,7 +507,7 @@ func pdf_write_row_indent(m pdf.Maroto, line string, rowheight float64, colwidth
 // New style PDFreportwriter row writer
 func pdf_write_row_tuple_indent(m pdf.Maroto, line1 string, line2 string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color, indent uint) {
 	if line2 == "" || line2 == " " {
-		textcolour = pdfRed()
+		textcolour = pdfErrorColour()
 		line2 = nullstring
 	}
 
@@ -541,7 +558,7 @@ func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth ui
 		var text string = lines[line]
 
 		if text == "" || text == " " || text == nullstring {
-			textcolour = pdfRed()
+			textcolour = pdfErrorColour()
 		} else {
 			textcolour = pdfBlack()
 		}
@@ -575,7 +592,7 @@ func pdf_write_list_sub1(m pdf.Maroto, lines []string, rowheight float64, colwid
 
 	for line := range lines {
 		if lines[line] == "" || lines[line] == " " {
-			textcolour = pdfRed()
+			textcolour = pdfErrorColour()
 		} else {
 			textcolour = pdfBlack()
 		}
@@ -608,13 +625,43 @@ func pdf_write_creators(m pdf.Maroto, data Yoda18Metadata, rowheight float64, co
 	// var ind2 uint = 2
 	pdf_write_row(m, "Creators", rowheight, colwidth, consts.Bold, pdfBlack())
 	for i := range data.Creator {
-		pdf_write_row(m, fmt.Sprintf("%s %s", data.Creator[i].Name.GivenName, data.Creator[i].Name.FamilyName), rowheight, colwidth, consts.Normal, pdfBlack())
+		GivenName := data.Creator[i].Name.GivenName
+		FamilyName := data.Creator[i].Name.FamilyName
+		textcolour2 := textcolour
+		if GivenName == "" {
+			GivenName = "GivenName"
+			textcolour2 = pdfErrorColour()
+		}
+		if FamilyName == "" {
+			FamilyName = "FamilyName"
+			textcolour2 = pdfErrorColour()
+		}
+
+		pdf_write_row(m, fmt.Sprintf("%s %s", GivenName, FamilyName), rowheight, colwidth, consts.Normal, textcolour2)
 		for j := range data.Creator[i].Affiliation {
-			pdf_write_row_indent(m, data.Creator[i].Affiliation[j], rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+			textcolour2 = textcolour
+			text := data.Creator[i].Affiliation[j]
+			if text == "" {
+				text = "Affiliation"
+				textcolour2 = pdfErrorColour()
+			}
+			pdf_write_row_indent(m, text, rowheight, colwidth, consts.Normal, textcolour2, ind1)
 		}
 		for k := range data.Creator[i].PersonIdentifier {
-			pdf_write_row_indent(m, fmt.Sprintf("(%s) %s", data.Creator[i].PersonIdentifier[k].NameIdentifierScheme, data.Creator[i].PersonIdentifier[k].NameIdentifier),
-				rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+			text := data.Creator[i].PersonIdentifier[k].NameIdentifierScheme
+			text2 := data.Creator[i].PersonIdentifier[k].NameIdentifier
+			textcolour2 = textcolour
+			if text == "" {
+				text = "IdentifierScheme"
+				textcolour2 = pdfErrorColour()
+			}
+			if text2 == "" {
+				text2 = "Identifier"
+				textcolour2 = pdfErrorColour()
+			}
+
+			pdf_write_row_indent(m, fmt.Sprintf("(%s) %s", text, text2),
+				rowheight, colwidth, consts.Normal, textcolour2, ind1)
 		}
 	}
 }
@@ -624,14 +671,49 @@ func pdf_write_contributors(m pdf.Maroto, data Yoda18Metadata, rowheight float64
 	// var ind2 uint = 2
 	pdf_write_row(m, "Contributors", rowheight, colwidth, consts.Bold, pdfBlack())
 	for i := range data.Contributor {
-		pdf_write_row(m, fmt.Sprintf("%s %s", data.Contributor[i].Name.GivenName, data.Contributor[i].Name.FamilyName), rowheight, colwidth, consts.Normal, pdfBlack())
-		pdf_write_row_indent(m, fmt.Sprintf("%s", data.Contributor[i].ContributorType), rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+		GivenName := data.Contributor[i].Name.GivenName
+		FamilyName := data.Contributor[i].Name.FamilyName
+		ContributorType := data.Contributor[i].ContributorType
+		textcolour2 := textcolour
+		textcolour3 := textcolour
+		if GivenName == "" {
+			GivenName = "GivenName"
+			textcolour2 = pdfErrorColour()
+		}
+		if FamilyName == "" {
+			FamilyName = "FamilyName"
+			textcolour2 = pdfErrorColour()
+		}
+		if ContributorType == "" {
+			ContributorType = "ContributorType"
+			textcolour3 = pdfErrorColour()
+		}
+		pdf_write_row(m, fmt.Sprintf("%s %s", GivenName, FamilyName), rowheight, colwidth, consts.Normal, textcolour2)
+		pdf_write_row_indent(m, ContributorType, rowheight, colwidth, consts.Normal, textcolour3, ind1)
 		for j := range data.Contributor[i].Affiliation {
-			pdf_write_row_indent(m, data.Contributor[i].Affiliation[j], rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+			textcolour2 := textcolour
+			affil := data.Contributor[i].Affiliation[j]
+			if affil == "" {
+				affil = "Affiliation"
+				textcolour2 = pdfErrorColour()
+			}
+
+			pdf_write_row_indent(m, affil, rowheight, colwidth, consts.Normal, textcolour2, ind1)
 		}
 		for k := range data.Contributor[i].PersonIdentifier {
-			pdf_write_row_indent(m, fmt.Sprintf("(%s) %s", data.Contributor[i].PersonIdentifier[k].NameIdentifierScheme, data.Contributor[i].PersonIdentifier[k].NameIdentifier),
-				rowheight, colwidth, consts.Normal, pdfBlack(), ind1)
+			text := data.Contributor[i].PersonIdentifier[k].NameIdentifierScheme
+			text2 := data.Contributor[i].PersonIdentifier[k].NameIdentifier
+			textcolour2 := textcolour
+			if text == "" {
+				text = "IdentifierScheme"
+				textcolour2 = pdfErrorColour()
+			}
+			if text2 == "" {
+				text2 = "Identifier"
+				textcolour2 = pdfErrorColour()
+			}
+			pdf_write_row_indent(m, fmt.Sprintf("(%s) %s", text, text2),
+				rowheight, colwidth, consts.Normal, textcolour2, ind1)
 		}
 	}
 }
@@ -648,14 +730,33 @@ func pdf_write_funding(m pdf.Maroto, data Yoda18Metadata, rowheight float64, col
 func pdf_write_related(m pdf.Maroto, data Yoda18Metadata, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	pdf_write_row(m, "Related datapackages", rowheight, colwidth, consts.Bold, pdfBlack())
 	for i := range data.RelatedDatapackage {
-		pdf_write_row(m, data.RelatedDatapackage[i].RelationType, rowheight, colwidth, consts.Normal, pdfBlack())
-		if data.RelatedDatapackage[i].PersistentIdentifier.IdentifierScheme == "" {
-			pdf_write_row_indent(m, "(string)"+data.RelatedDatapackage[i].PersistentIdentifier.Identifier, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
-		} else {
-			pdf_write_row_indent(m, "("+data.RelatedDatapackage[i].PersistentIdentifier.IdentifierScheme+") "+data.RelatedDatapackage[i].PersistentIdentifier.Identifier, rowheight,
-				colwidth, consts.Normal, pdfBlack(), 1)
+		textcolour2 := textcolour
+		reltype := data.RelatedDatapackage[i].RelationType
+		if reltype == "" {
+			reltype = "RelationType"
+			textcolour2 = pdfErrorColour()
 		}
-		pdf_write_row_indent(m, data.RelatedDatapackage[i].Title, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
+		pdf_write_row(m, reltype, rowheight, colwidth, consts.Normal, textcolour2)
+		textcolour3 := textcolour
+		text := data.RelatedDatapackage[i].PersistentIdentifier.IdentifierScheme
+		text2 := data.RelatedDatapackage[i].PersistentIdentifier.Identifier
+		if text == "" {
+			text = "IdentifierSchema"
+			textcolour3 = pdfErrorColour()
+		}
+		if text2 == "" {
+			text2 = "Identifier"
+			textcolour3 = pdfErrorColour()
+		}
+		pdf_write_row_indent(m, "("+text+") "+text2, rowheight, colwidth, consts.Normal, textcolour3, 1)
+
+		textcolour4 := textcolour
+		title := data.RelatedDatapackage[i].Title
+		if title == "" {
+			title = "Title"
+			textcolour4 = pdfErrorColour()
+		}
+		pdf_write_row_indent(m, title, rowheight, colwidth, consts.Normal, textcolour4, 1)
 	}
 }
 
