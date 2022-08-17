@@ -3,7 +3,7 @@ readYmeta.go reading and converting Yoda metadata
 Author: Brett G. Olivier
 email: @bgoli
 licence: BSD 3 Clause
-version: 0.6
+version: 0.7-alpha
 (C) Brett G. Olivier, Vrije Universiteit Amsterdam, Amsterdam, The Netherlands, 2022
 */
 
@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"time"
 
 	"github.com/johnfercher/maroto/pkg/color"
@@ -24,7 +23,7 @@ import (
 )
 
 // Define global constants here?
-const _VERSION_ = "0.6.5.alpha"
+const _VERSION_ = "0.7-alpha"
 
 // Vanilla Yoda metadata struct
 type Yoda18Metadata struct {
@@ -161,9 +160,9 @@ type Yoda18MetadataV2 struct {
 }
 
 const DEBUG bool = false
-
 const fontsize float64 = 10
 const indentsymb string = " "
+const nullstring string = "<empty>"
 const minRGB8Bytes = 0
 const maxRGB8Bytes = 255
 
@@ -210,36 +209,42 @@ func main() {
 		fmt.Printf("\n\n----------------\n\n")
 	}
 
-	//// old way of doing this
-	doc_text_basic := get_basic_document_data(json_dat)
+	/*
 
-	// Random checks
+		//// old way of doing this
+		doc_text_basic := get_basic_document_data(json_dat)
+
+		// Random checks
+		if DEBUG {
+			fmt.Println(doc_text_basic)
+			fmt.Println(reflect.TypeOf(doc_text_basic))
+			fmt.Println(doc_text_basic[0])
+		}
+
+		// dump to PDF
+		doc_array := doc_text_basic
+		pdf_create_and_dump(output_file_name, doc_array)
+
+		//// old way of doing things
+	*/
 	if DEBUG {
-		fmt.Println(doc_text_basic)
-		fmt.Println(reflect.TypeOf(doc_text_basic))
-		fmt.Println(doc_text_basic[0])
+		fmt.Printf("\n\n-------***-------\n\n")
 	}
-
-	// dump to PDF
-	doc_array := doc_text_basic
-	pdf_create_and_dump(output_file_name, doc_array)
-
-	//// old way of doing things
-
-	fmt.Printf("\n\n-------***-------\n\n")
 	//// New way of doing things where we write the document directly
 	doc := pdf.NewMaroto(consts.Portrait, consts.A4)
 	//m.SetBorder(true)
 	doc.SetPageMargins(10, 10, 10)
-
 	doc = generate_pdf_report_basic(json_dat, doc, input_file_name)
 
-	pdf_write_row(doc, "I am some BLACK coloured TEXT!", 12, 4, consts.Normal, pdfBlack())
-	pdf_write_row(doc, "I am some BLUE coloured TEXT!", 12, 4, consts.Normal, pdfBlue())
-	pdf_write_row(doc, "I am some GREEN coloured TEXT!", 12, 4, consts.Normal, pdfGreen())
-	pdf_write_row(doc, "I am some RED coloured TEXT!", 12, 4, consts.Normal, pdfRed())
-
-	err := doc.OutputFileAndClose(fmt.Sprintf("%s", "new_form.pdf"))
+	/*
+		if DEBUG {
+			pdf_write_row(doc, "I am some BLACK coloured TEXT!", 12, 4, consts.Normal, pdfBlack())
+			pdf_write_row(doc, "I am some BLUE coloured TEXT!", 12, 4, consts.Normal, pdfBlue())
+			pdf_write_row(doc, "I am some GREEN coloured TEXT!", 12, 4, consts.Normal, pdfGreen())
+			pdf_write_row(doc, "I am some RED coloured TEXT!", 12, 4, consts.Normal, pdfRed())
+		}
+	*/
+	err := doc.OutputFileAndClose(output_file_name)
 	errcntrl(err)
 
 }
@@ -330,13 +335,12 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 	var colwidth uint = 12
 	var rowheight float64 = 4
 	var textblock_divider float64 = 20
+	var empty_line_height float64 = 2
 
 	pdf_write_header(doc, fmt.Sprintf("\"%s\" metadata", fname), rowheight, colwidth)
-	pdf_write_footer(doc, fmt.Sprintf("\"%s\" metadata generated on %s by readYmeta v%s", fname, ctime, _VERSION_), rowheight, colwidth)
+	pdf_write_footer(doc, fmt.Sprintf("\"%s\" metadata generated on %s\nby readYmeta v%s", fname, ctime, _VERSION_), rowheight, colwidth)
 
-	pdf_write_row(doc, "Title", rowheight, colwidth, consts.Bold, pdfBlack())
-	pdf_write_row(doc, data.Title, rowheight, colwidth, consts.Normal, pdfBlack())
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Title", data.Title, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 
 	pdf_write_row(doc, "Description", rowheight, colwidth, consts.Bold, pdfBlack())
 	if float64(len(data.Description))/textblock_divider > rowheight {
@@ -344,38 +348,49 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 	} else {
 		pdf_write_row(doc, data.Description, rowheight, colwidth, consts.Normal, pdfOrange())
 	}
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
 	pdf_write_row(doc, "Tags", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_list(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
 	// pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
 	pdf_write_creators(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
 	pdf_write_contributors(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
 	pdf_write_row(doc, "Disciplines", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_list(doc, data.Discipline, rowheight, colwidth, consts.Normal, pdfBlack())
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
 	pdf_write_row(doc, "Collected", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_row_tuple_indent(doc, "StartDate", data.Collected.StartDate, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
 	pdf_write_row_tuple_indent(doc, "EndDate", data.Collected.EndDate, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
 	pdf_write_row(doc, "Covered Period", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_row_tuple_indent(doc, "StartDate", data.CoveredPeriod.StartDate, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
 	pdf_write_row_tuple_indent(doc, "EndDate", data.CoveredPeriod.EndDate, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
 	pdf_write_funding(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
 	pdf_write_related(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
-	pdf_write_row(doc, "", 1, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(doc, empty_line_height, colwidth)
+
+	pdf_write_labelled_row(doc, "Dataset Version", data.Version, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Licence", data.License, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Data Type", data.DataType, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Data Classification", data.DataClassification, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Data Access Restriction", data.DataAccessRestriction, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Language", data.Language, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Retention Period", fmt.Sprint(data.RetentionPeriod)+" years", rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Retention Information", data.RetentionInformation, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Embargo EndDate", data.EmbargoEndDate, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row(doc, "Remarks", data.Remarks, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 
 	return doc
 }
@@ -414,6 +429,10 @@ func pdf_write_footer(m pdf.Maroto, line string, rowheight float64, colwidth uin
 
 // New style PDFreportwriter row writer
 func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
+	if line == "" || line == " " {
+		textcolour = pdfRed()
+		line = nullstring
+	}
 	m.Row(rowheight, func() {
 		m.Col(colwidth, func() {
 			m.Text(line, props.Text{
@@ -428,9 +447,22 @@ func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint, 
 }
 
 // New style PDFreportwriter row writer
+func pdf_write_labelled_row(m pdf.Maroto, label string, line string, rowheight float64, colwidth uint, emptyrowheight float64, fontstyle consts.Style, textcolour color.Color) {
+	pdf_write_row(m, label, rowheight, colwidth, consts.Bold, pdfBlack())
+	pdf_write_row(m, line, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_empty_row(m, emptyrowheight, colwidth)
+}
+
+// New style PDFreportwriter row writer
+func pdf_write_empty_row(m pdf.Maroto, rowheight float64, colwidth uint) {
+	pdf_write_row(m, "  ", rowheight, colwidth, consts.Normal, pdfBlack())
+}
+
+// New style PDFreportwriter row writer
 func pdf_write_row_indent(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color, indent uint) {
 	if line == "" || line == " " {
 		textcolour = pdfRed()
+		line = nullstring
 	}
 
 	m.Row(rowheight, func() {
@@ -459,6 +491,7 @@ func pdf_write_row_indent(m pdf.Maroto, line string, rowheight float64, colwidth
 func pdf_write_row_tuple_indent(m pdf.Maroto, line1 string, line2 string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color, indent uint) {
 	if line2 == "" || line2 == " " {
 		textcolour = pdfRed()
+		line2 = nullstring
 	}
 
 	m.Row(rowheight, func() {
@@ -500,13 +533,19 @@ func pdf_write_row_tuple_indent(m pdf.Maroto, line1 string, line2 string, rowhei
 func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	var indent uint = 1
 
+	if len(lines) == 0 {
+		lines = append(lines, nullstring)
+	}
+
 	for line := range lines {
-		if lines[line] == "" || lines[line] == " " {
+		var text string = lines[line]
+
+		if text == "" || text == " " || text == nullstring {
 			textcolour = pdfRed()
 		} else {
 			textcolour = pdfBlack()
 		}
-		// fmt.Printf("%s\n", lines[line])
+		// fmt.Printf("%s\n", text)
 		m.Row(rowheight, func() {
 			m.Col(indent, func() {
 				m.Text(indentsymb, props.Text{
@@ -518,7 +557,7 @@ func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth ui
 				})
 			})
 			m.Col(colwidth-indent, func() {
-				m.Text(lines[line], props.Text{
+				m.Text(text, props.Text{
 					Top:         0,
 					Size:        fontsize - 1,
 					Extrapolate: false,
