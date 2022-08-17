@@ -200,36 +200,11 @@ func main() {
 	errcntrl(err2)
 
 	ERROR_COUNT = 0
-	// print struct and explore new options
-	/*
-		fmt.Println(" ")
-		fmt.Println(json_dat)
-		fmt.Println(reflect.TypeOf(json_dat))
-		fmt.Println(len(json_dat.Contributor))
-	*/
 	// lets do something more useful
 	if DEBUG {
 		fmt.Printf("\n\n----------------\n\n")
 	}
 
-	/*
-
-		//// old way of doing this
-		doc_text_basic := get_basic_document_data(json_dat)
-
-		// Random checks
-		if DEBUG {
-			fmt.Println(doc_text_basic)
-			fmt.Println(reflect.TypeOf(doc_text_basic))
-			fmt.Println(doc_text_basic[0])
-		}
-
-		// dump to PDF
-		doc_array := doc_text_basic
-		pdf_create_and_dump(output_file_name, doc_array)
-
-		//// old way of doing things
-	*/
 	if DEBUG {
 		fmt.Printf("\n\n-------***-------\n\n")
 	}
@@ -239,14 +214,6 @@ func main() {
 	doc.SetPageMargins(10, 10, 10)
 	doc = generate_pdf_report_basic(json_dat, doc, input_file_name)
 
-	/*
-		if DEBUG {
-			pdf_write_row(doc, "I am some BLACK coloured TEXT!", 12, 4, consts.Normal, pdfBlack())
-			pdf_write_row(doc, "I am some BLUE coloured TEXT!", 12, 4, consts.Normal, pdfBlue())
-			pdf_write_row(doc, "I am some GREEN coloured TEXT!", 12, 4, consts.Normal, pdfGreen())
-			pdf_write_row(doc, "I am some RED coloured TEXT!", 12, 4, consts.Normal, pdfRed())
-		}
-	*/
 	err := doc.OutputFileAndClose(output_file_name)
 	errcntrl(err)
 
@@ -760,10 +727,13 @@ func pdf_write_related(m pdf.Maroto, data Yoda18Metadata, rowheight float64, col
 	}
 }
 
-// pdf_write_row(doc, "Tag", rowheight, colwidth, consts.Bold, pdfBlack())
-// pdf_write_list(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
-// pdf_write_list_sub1(doc, data.Tag, rowheight, colwidth, consts.Normal, pdfBlack())
+/*
+Seems to work!
+Funky GO template builder: https://mholt.github.io/json-to-go/
+*/
 
+/*
+Old writer code
 // This is an old function which generates "formatted" strings as output
 func pdf_create_and_dump(fname string, sarr []string) {
 
@@ -908,9 +878,25 @@ func get_basic_document_data(doc Yoda18Metadata) []string {
 	return output
 }
 
-/*
-Seems to work!
-Funky GO template builder: https://mholt.github.io/json-to-go/
+
+func main() {
+		//// old way of doing this
+		doc_text_basic := get_basic_document_data(json_dat)
+
+		// Random checks
+		if DEBUG {
+			fmt.Println(doc_text_basic)
+			fmt.Println(reflect.TypeOf(doc_text_basic))
+			fmt.Println(doc_text_basic[0])
+		}
+
+		// dump to PDF
+		doc_array := doc_text_basic
+		pdf_create_and_dump(output_file_name, doc_array)
+
+		//// old way of doing things
+	}
+
 */
 
 // learning how not to do stuff
