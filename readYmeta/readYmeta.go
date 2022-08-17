@@ -331,8 +331,8 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 	var rowheight float64 = 4
 	var textblock_divider float64 = 20
 
-	pdf_write_header(doc, fmt.Sprintf("\"%s\" metadata report", fname), rowheight, colwidth)
-	pdf_write_footer(doc, fmt.Sprintf("\"%s\" metadata report generated on %s by readYmeta v%s", fname, ctime, _VERSION_), rowheight, colwidth)
+	pdf_write_header(doc, fmt.Sprintf("\"%s\" metadata", fname), rowheight, colwidth)
+	pdf_write_footer(doc, fmt.Sprintf("\"%s\" metadata generated on %s by readYmeta v%s", fname, ctime, _VERSION_), rowheight, colwidth)
 
 	pdf_write_row(doc, "Title", rowheight, colwidth, consts.Bold, pdfBlack())
 	pdf_write_row(doc, data.Title, rowheight, colwidth, consts.Normal, pdfBlack())
@@ -387,7 +387,7 @@ func pdf_write_header(m pdf.Maroto, line string, rowheight float64, colwidth uin
 			m.Col(colwidth, func() {
 				m.Text(line, props.Text{
 					Top:         0,
-					Size:        14,
+					Size:        12,
 					Extrapolate: true,
 				})
 			})
@@ -617,7 +617,6 @@ func pdf_write_related(m pdf.Maroto, data Yoda18Metadata, rowheight float64, col
 				colwidth, consts.Normal, pdfBlack(), 1)
 		}
 		pdf_write_row_indent(m, data.RelatedDatapackage[i].Title, rowheight, colwidth, consts.Normal, pdfBlack(), 1)
-
 	}
 }
 
