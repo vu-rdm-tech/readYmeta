@@ -1,6 +1,5 @@
 # GO executables
-*.exe
-binaries/
+readYmeta.exe
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -2,10 +2,7 @@ module readYmeta
 
 go 1.18
 
-require (
-	github.com/johnfercher/maroto v0.37.0
-	golang.org/x/text v0.3.0
-)
+require github.com/johnfercher/maroto v0.37.0
 
 require (
 	github.com/boombuler/barcode v1.0.1 // indirect

@@ -1,10 +1,15 @@
 /*
-readYmeta.go reading and converting Yoda metadata
-Author: Brett G. Olivier
+readYmeta.go reading and converting Yoda metadata from JSON to PDF formats
+Usage: readYmeta.exe <yoda metadata file> filename can include a path. If no file is
+		specified "yoda-metadata.json" is assumed in current directory.
+Output: A PDF file containing the Yoda metadata with missing attributes highlighted.
+		output <filename>.pdf is formed from input <filename>.json, defualts to current directory.
+Author: Brett G. Olivier PhD
 email: @bgoli
 licence: BSD 3 Clause
 version: 0.7-beta
-(C) Brett G. Olivier, Vrije Universiteit Amsterdam, Amsterdam, The Netherlands, 2022
+Date: 2022-08-22
+(C) Brett G. Olivier, Vrije Universiteit Amsterdam, Amsterdam, The Netherlands, 2022.
 */
 
 package main
