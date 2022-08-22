@@ -7,11 +7,9 @@ del readYmeta.exe
 del *.pdf
 del %TEST_DIR%\*.pdf
 
-PAUSE
+: PAUSE
 
 go build readYmeta.go
-
-
 
 readYmeta.exe
 readYmeta.exe %TEST_DIR%\yoda-metadata[blank].json
@@ -22,4 +20,3 @@ readYmeta.exe %TEST_DIR%\yoda-metadata[uu013].json
 
 dir *.pdf
 dir %TEST_DIR%\*.pdf
-

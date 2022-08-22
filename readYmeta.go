@@ -732,6 +732,12 @@ func pdf_write_related(m pdf.Maroto, data Yoda18Metadata, rowheight float64, col
 	}
 }
 
+// //test main function
+// func TestMain(m *testing.M) {
+// 	// call flag.Parse() here if TestMain uses flags
+// 	os.Exit(m.Run())
+// }
+
 /*
 Seems to work!
 Funky GO template builder: https://mholt.github.io/json-to-go/
