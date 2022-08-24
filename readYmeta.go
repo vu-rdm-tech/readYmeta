@@ -497,7 +497,7 @@ func pdf_write_row_tuple_indent(m pdf.Maroto, line1 string, line2 string, rowhei
 				})
 			})
 		}
-		m.Col(indent+1, func() {
+		m.Col(indent+4, func() {
 			m.Text(line1, props.Text{
 				Top:         0,
 				Size:        fontsize,
@@ -506,7 +506,7 @@ func pdf_write_row_tuple_indent(m pdf.Maroto, line1 string, line2 string, rowhei
 				Color:       textcolour,
 			})
 		})
-		m.Col(colwidth-indent-1, func() {
+		m.Col(colwidth-indent-4, func() {
 			m.Text(line2, props.Text{
 				Top:         0,
 				Size:        fontsize,
