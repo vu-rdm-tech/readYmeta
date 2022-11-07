@@ -17,6 +17,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -184,6 +185,7 @@ func main() {
 	input_file_name, input_file_path, err1 := get_input_file_path_from_clargs()
 	errcntrl(err1)
 	output_file_name := input_file_name + ".pdf"
+	output_file_name_md := input_file_name + ".md"
 	if DEBUG {
 		fmt.Println(input_file_name)
 		fmt.Println(input_file_path)
@@ -218,16 +220,71 @@ func main() {
 	//m.SetBorder(true)
 	doc.SetPageMargins(10, 10, 10)
 	doc = generate_pdf_report_basic(json_dat, doc, input_file_name)
-
 	err := doc.OutputFileAndClose(output_file_name)
 	errcntrl(err)
 
+	// write the contents of the metadata to a md file
+	mdoc := "string contents of file\nthe end\n"
+	mdoc = create_md_readme(json_dat)
+	_ = write_string_to_file(mdoc, output_file_name_md)
+
 }
 
+// handle and error
 func errcntrl(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+//string to file function
+func write_string_to_file(mdoc string, fname string) error {
+	f, err := os.Create(fname)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	_, err2 := f.WriteString(mdoc)
+
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+
+	fmt.Println("done.")
+	return err2
+}
+
+// create a md string that represents the Yoda metadata
+func create_md_readme(data Yoda18Metadata) string {
+	var out string = "# Hokey Kokey Reportey\n"
+
+	var basic string = fmt.Sprintln("\n## Identification")
+	basic += fmt.Sprintf("- Title: %s\n", data.Title)
+	basic += fmt.Sprintf("- Date: %s %s\n", data.Collected.StartDate, data.Collected.EndDate)
+	basic += fmt.Sprintf("- ResourceType: %s\n", data.DataType)
+	basic += fmt.Sprintf("- Rights: %s\n", data.License)
+	basic += fmt.Sprintf("- Version: %s\n", data.Version)
+
+	var basic2 string = fmt.Sprintln("\n## Creator")
+	for cre := range data.Creator {
+		basic2 += fmt.Sprintf("- Creator %s %s ", data.Creator[cre].Name.GivenName, data.Creator[cre].Name.FamilyName)
+		for pid := range data.Creator[cre].PersonIdentifier {
+			basic2 += fmt.Sprintf("(%s %s) ", data.Creator[cre].PersonIdentifier[pid].NameIdentifierScheme,
+				data.Creator[cre].PersonIdentifier[pid].NameIdentifier)
+		}
+		basic2 += "\n"
+		for aff := range data.Creator[cre].Affiliation {
+			basic2 += fmt.Sprintf("  - CreatorAffiliation: %s\n", data.Creator[cre].Affiliation[aff])
+		}
+	}
+	basic2 += fmt.Sprintln("\n## Description")
+	basic2 += fmt.Sprintf("%s\n", data.Description)
+
+	out = out + basic + basic2
+	return out
 }
 
 // Maroto PDF color defintions
