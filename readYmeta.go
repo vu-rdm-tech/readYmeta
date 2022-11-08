@@ -29,7 +29,7 @@ import (
 )
 
 // Define global constants here?
-const _MYVERSION_ = "0.7-beta"
+const _MYVERSION_ = "0.8-beta"
 
 // Vanilla Yoda metadata struct
 type Yoda18Metadata struct {
@@ -263,21 +263,21 @@ func create_md_readme(data Yoda18Metadata) string {
 
 	var basic string = fmt.Sprintln("\n## Identification")
 	basic += fmt.Sprintf("- Title: %s\n", data.Title)
-	basic += fmt.Sprintf("- Date: %s %s\n", data.Collected.StartDate, data.Collected.EndDate)
+	basic += fmt.Sprintf("- CollectionDate: %s to %s\n", data.Collected.StartDate, data.Collected.EndDate)
 	basic += fmt.Sprintf("- ResourceType: %s\n", data.DataType)
 	basic += fmt.Sprintf("- Rights: %s\n", data.License)
 	basic += fmt.Sprintf("- Version: %s\n", data.Version)
 
 	var basic2 string = fmt.Sprintln("\n## Creator")
 	for cre := range data.Creator {
-		basic2 += fmt.Sprintf("- Creator %s %s ", data.Creator[cre].Name.GivenName, data.Creator[cre].Name.FamilyName)
+		basic2 += fmt.Sprintf("- Creator: %s %s ", data.Creator[cre].Name.GivenName, data.Creator[cre].Name.FamilyName)
 		for pid := range data.Creator[cre].PersonIdentifier {
-			basic2 += fmt.Sprintf("(%s %s) ", data.Creator[cre].PersonIdentifier[pid].NameIdentifierScheme,
+			basic2 += fmt.Sprintf("(%s: %s) ", data.Creator[cre].PersonIdentifier[pid].NameIdentifierScheme,
 				data.Creator[cre].PersonIdentifier[pid].NameIdentifier)
 		}
 		basic2 += "\n"
 		for aff := range data.Creator[cre].Affiliation {
-			basic2 += fmt.Sprintf("  - CreatorAffiliation: %s\n", data.Creator[cre].Affiliation[aff])
+			basic2 += fmt.Sprintf("- CreatorAffiliation: %s\n", data.Creator[cre].Affiliation[aff])
 		}
 	}
 	basic2 += fmt.Sprintln("\n## Description")

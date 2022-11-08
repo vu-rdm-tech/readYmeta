@@ -1,4 +1,6 @@
-# Hokey Kokey Reportey
+# readme.txt
+
+The zipped archive contains data and analyses published in https://doi.org/10.3389/fmicb.2018.02218
 
 ## Identification
 - Title: Naturally Fermented Milk from Northern Senegal
