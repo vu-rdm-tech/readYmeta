@@ -7,7 +7,7 @@ Output: A PDF file containing the Yoda metadata with missing attributes highligh
 Author: Brett G. Olivier PhD
 email: @bgoli
 licence: BSD 3 Clause
-version: 0.7-beta
+version: 0.8
 Date: 2022-08-22
 (C) Brett G. Olivier, Vrije Universiteit Amsterdam, Amsterdam, The Netherlands, 2022.
 */
@@ -29,7 +29,7 @@ import (
 )
 
 // Define global constants here?
-const _MYVERSION_ = "0.8-beta"
+const _MYVERSION_ = "0.8"
 
 // Vanilla Yoda metadata struct
 type Yoda18Metadata struct {
@@ -176,7 +176,7 @@ var ERROR_COUNT uint = 0
 
 func main() {
 
-	msg := "readYmeta - (C)Brett G. Olivier, Vrije Universiteit Amsterdam, 2022"
+	msg := "readYmeta2 v" + _MYVERSION_ + " - (C) Brett G. Olivier, Vrije Universiteit Amsterdam, 2023"
 	fmt.Println(msg)
 	// fmt.Println()
 	fmt.Println(" ")
@@ -424,7 +424,12 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 	pdf_write_labelled_row(doc, "Licence", data.License, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 	pdf_write_labelled_row(doc, "Data Type", data.DataType, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 	pdf_write_labelled_row(doc, "Data Classification", data.DataClassification, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
-	pdf_write_labelled_row(doc, "Data Access Restriction", data.DataAccessRestriction, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	if data.DataAccessRestriction == "Open - freely retrievable" {
+		pdf_write_labelled_row(doc, "Data Access Restriction", data.DataAccessRestriction, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	} else {
+		pdf_write_labelled_row(doc, "Data Access Restriction", data.DataAccessRestriction, rowheight, colwidth, empty_line_height, consts.Normal, pdfOrange())
+	}
+
 	pdf_write_labelled_row(doc, "Language", data.Language, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 	pdf_write_labelled_row(doc, "Retention Period", fmt.Sprint(data.RetentionPeriod)+" years", rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 	pdf_write_labelled_row(doc, "Retention Information", data.RetentionInformation, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
