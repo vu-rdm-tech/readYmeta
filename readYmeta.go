@@ -19,7 +19,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/johnfercher/maroto/pkg/color"
@@ -165,7 +167,7 @@ type Yoda18MetadataV2 struct {
 	License               string `json:"License,omitempty"`
 }
 
-const DEBUG bool = true
+const DEBUG bool = false
 const fontsize float64 = 10
 const indentsymb string = " "
 const nullstring string = "<empty>"
@@ -184,10 +186,22 @@ func main() {
 	// define input and output files
 	input_file_name, input_file_path, output_file_path, err1 := get_input_file_path_from_clargs()
 	errcntrl(err1)
-	// output_file_name := input_file_name + ".pdf"
-	// output_file_name_md := input_file_name + ".md"
-	output_file_name := output_file_path + ".pdf"
-	output_file_name_md := output_file_path + ".md"
+
+	input_file_name_noext := strings.Join(strings.Split(input_file_name, "")[:len(input_file_name)-5], "")
+	output_file_name := filepath.Join(output_file_path, input_file_name_noext+".pdf")
+	output_file_name_md := filepath.Join(output_file_path, input_file_name_noext+".md")
+
+	// winblowz
+
+	// fmt.Println("->", output_file_name)
+	output_file_path_full, _ := path.Split(strings.Replace(output_file_name, "\\", "/", -1))
+	// fmt.Println("->", fsplitd, fsplitf)
+	_ = os.MkdirAll(output_file_path_full, os.ModePerm)
+
+	// fmt.Println("-->", input_file_name)
+	// fmt.Println("-->", output_file_path)
+	// fmt.Println("-->", output_file_name)
+	// fmt.Println("-->", output_file_name_md)
 
 	if DEBUG {
 		fmt.Println(input_file_name)
@@ -348,7 +362,6 @@ func get_input_file_path_from_clargs() (string, string, string, error) {
 	var outdir string = "output"
 
 	cDir, err = os.Getwd()
-	filepath.Join(cDir, outdir, fname)
 	errcntrl(err)
 
 	if len(os.Args) > 1 {
@@ -373,20 +386,21 @@ func get_input_file_path_from_clargs() (string, string, string, error) {
 	//
 
 	output_file_path, _ := filepath.Abs(filepath.Join(cDir, outdir))
-
+	// fmt.Println(">", output_file_path)
 	_, err = os.Stat(output_file_path)
+
 	if os.IsNotExist(err) {
-		fmt.Println("Output file path does not exist:", output_file_path)
-		os.Mkdir(output_file_path, os.ModeDir)
-		pathlist := filepath.SplitList(fname)
-		fmt.Println(pathlist)
-		fname = pathlist[len(pathlist)-1]
+		fmt.Println("Output file path base does not exist:", output_file_path)
+		err = os.Mkdir(output_file_path, os.ModeDir)
+		//_, _ = os.Stat(output_file_path)
+		//		if os.IsNotExist(err2) {
+		//			fmt.Println("$%^&*()")
+		//		}
+
 	} else {
-		fmt.Println("Output file path exists:", output_file_path)
+		fmt.Println("Output file path base exists:", output_file_path)
 		err = nil
 	}
-
-	output_file_path = filepath.Join(output_file_path, fname)
 
 	return fname, input_file_path, output_file_path, err
 
