@@ -28,6 +28,9 @@ import (
 	"github.com/johnfercher/maroto/pkg/consts"
 	"github.com/johnfercher/maroto/pkg/pdf"
 	"github.com/johnfercher/maroto/pkg/props"
+	// "github.com/cyverse/go-irodsclient/fs"
+	// "github.com/cyverse/go-irodsclient/irods/types"
+	// "github.com/cyverse/go-irodsclient/irods/util"
 )
 
 // Define global constants here?
