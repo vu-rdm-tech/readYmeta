@@ -7,7 +7,7 @@ Output: A PDF file containing the Yoda metadata with missing attributes highligh
 Author: Brett G. Olivier PhD
 email: @bgoli
 licence: BSD 3 Clause
-version: 0.8
+version: 0.8.x
 Date: 2022-08-22
 (C) Brett G. Olivier, Vrije Universiteit Amsterdam, Amsterdam, The Netherlands, 2022.
 */
@@ -34,7 +34,7 @@ import (
 )
 
 // Define global constants here?
-const _MYVERSION_ = "0.8"
+const _MYVERSION_ = "0.8.2"
 
 // Vanilla Yoda metadata struct
 type Yoda18Metadata struct {
@@ -352,10 +352,21 @@ func pdfOrange() color.Color {
 }
 
 // Maroto PDF color defintions
-func pdfErrorColour() color.Color {
+func pdfWarningColour() color.Color {
 	// return pdfRed()
 	ERROR_COUNT = ERROR_COUNT + 1
 	return pdfBlue()
+}
+
+func pdfErrorColour() color.Color {
+	// return pdfRed()
+	ERROR_COUNT = ERROR_COUNT + 1
+	return pdfRed()
+}
+
+func pdfInfoColour() color.Color {
+	//ERROR_COUNT = ERROR_COUNT + 1
+	return pdfOrange()
 }
 
 func get_input_file_path_from_clargs() (string, string, string, error) {
@@ -421,12 +432,12 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 	pdf_write_footer(doc, fmt.Sprintf("\"%s\" metadata generated on %s\nby readYmeta v%s", fname, ctime, _MYVERSION_), rowheight, colwidth)
 
 	pdf_write_labelled_row(doc, "Title", data.Title, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
-
+	pdf_write_empty_row(doc, empty_line_height*2, colwidth)
 	pdf_write_row(doc, "Description", rowheight, colwidth, consts.Bold, pdfBlack())
 	if float64(len(data.Description))/textblock_divider > rowheight {
 		pdf_write_row(doc, data.Description, float64(len(data.Description))/textblock_divider, colwidth, consts.Normal, pdfBlack())
 	} else {
-		pdf_write_row(doc, data.Description, rowheight, colwidth, consts.Normal, pdfOrange())
+		pdf_write_row(doc, data.Description, rowheight, colwidth, consts.Normal, pdfInfoColour())
 	}
 	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
@@ -461,14 +472,19 @@ func generate_pdf_report_basic(data Yoda18Metadata, doc pdf.Maroto, fname string
 	pdf_write_related(doc, data, rowheight, colwidth, consts.Normal, pdfBlack())
 	pdf_write_empty_row(doc, empty_line_height, colwidth)
 
-	pdf_write_labelled_row(doc, "Dataset Version", data.Version, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	pdf_write_labelled_row_error(doc, "Dataset Version", data.Version, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 	pdf_write_labelled_row(doc, "Licence", data.License, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
 	pdf_write_labelled_row(doc, "Data Type", data.DataType, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
-	pdf_write_labelled_row(doc, "Data Classification", data.DataClassification, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
-	if data.DataAccessRestriction == "Open - freely retrievable" {
-		pdf_write_labelled_row(doc, "Data Access Restriction", data.DataAccessRestriction, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	//pdf_write_labelled_row(doc, "Data Classification", data.DataClassification, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
+	if data.DataAccessRestriction == "Open - freely retrievable" && data.DataClassification == "Public" {
+		pdf_write_labelled_row(doc, "Data Classification", data.DataClassification, rowheight, colwidth, empty_line_height, consts.Normal, pdfGreen())
+		pdf_write_labelled_row(doc, "Data Access Restriction", data.DataAccessRestriction, rowheight, colwidth, empty_line_height, consts.Normal, pdfGreen())
+	} else if data.DataAccessRestriction == "Open - freely retrievable" && data.DataClassification != "Public" {
+		pdf_write_labelled_row(doc, "Data Classification", data.DataClassification, rowheight, colwidth, empty_line_height, consts.Normal, pdfErrorColour())
+		pdf_write_labelled_row(doc, "Data Access Restriction", data.DataAccessRestriction, rowheight, colwidth, empty_line_height, consts.Normal, pdfErrorColour())
 	} else {
-		pdf_write_labelled_row(doc, "Data Access Restriction", data.DataAccessRestriction, rowheight, colwidth, empty_line_height, consts.Normal, pdfOrange())
+		pdf_write_labelled_row(doc, "Data Classification", data.DataClassification, rowheight, colwidth, empty_line_height, consts.Normal, pdfWarningColour())
+		pdf_write_labelled_row(doc, "Data Access Restriction", data.DataAccessRestriction, rowheight, colwidth, empty_line_height, consts.Normal, pdfWarningColour())
 	}
 
 	pdf_write_labelled_row(doc, "Language", data.Language, rowheight, colwidth, empty_line_height, consts.Normal, pdfBlack())
@@ -519,12 +535,26 @@ func pdf_write_footer(m pdf.Maroto, line string, rowheight float64, colwidth uin
 	})
 }
 
-// New style PDFreportwriter row writer
+// Write row that generates a warning
 func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
+	if line == "" || line == " " {
+		textcolour = pdfWarningColour()
+		line = nullstring
+	}
+	pdf_write_row_base(m, line, rowheight, colwidth, fontstyle, textcolour)
+}
+
+// Write row that generates an error rather than a warning
+func pdf_write_row_error(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	if line == "" || line == " " {
 		textcolour = pdfErrorColour()
 		line = nullstring
 	}
+	pdf_write_row_base(m, line, rowheight, colwidth, fontstyle, textcolour)
+}
+
+// New style PDFreportwriter row writer
+func pdf_write_row_base(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	m.Row(rowheight, func() {
 		m.Col(colwidth, func() {
 			m.Text(line, props.Text{
@@ -541,7 +571,14 @@ func pdf_write_row(m pdf.Maroto, line string, rowheight float64, colwidth uint, 
 // New style PDFreportwriter row writer
 func pdf_write_labelled_row(m pdf.Maroto, label string, line string, rowheight float64, colwidth uint, emptyrowheight float64, fontstyle consts.Style, textcolour color.Color) {
 	pdf_write_row(m, label, rowheight, colwidth, consts.Bold, pdfBlack())
-	pdf_write_row(m, line, rowheight, colwidth, consts.Normal, pdfBlack())
+	pdf_write_row(m, line, rowheight, colwidth, consts.Normal, textcolour)
+	pdf_write_empty_row(m, emptyrowheight, colwidth)
+}
+
+// New style PDFreportwriter row writer
+func pdf_write_labelled_row_error(m pdf.Maroto, label string, line string, rowheight float64, colwidth uint, emptyrowheight float64, fontstyle consts.Style, textcolour color.Color) {
+	pdf_write_row_error(m, label, rowheight, colwidth, consts.Bold, textcolour)
+	pdf_write_row_error(m, line, rowheight, colwidth, consts.Normal, textcolour)
 	pdf_write_empty_row(m, emptyrowheight, colwidth)
 }
 
@@ -553,7 +590,7 @@ func pdf_write_empty_row(m pdf.Maroto, rowheight float64, colwidth uint) {
 // New style PDFreportwriter row writer
 func pdf_write_row_indent(m pdf.Maroto, line string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color, indent uint) {
 	if line == "" || line == " " {
-		textcolour = pdfErrorColour()
+		textcolour = pdfWarningColour()
 		line = nullstring
 	}
 
@@ -582,7 +619,7 @@ func pdf_write_row_indent(m pdf.Maroto, line string, rowheight float64, colwidth
 // New style PDFreportwriter row writer
 func pdf_write_row_tuple_indent(m pdf.Maroto, line1 string, line2 string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color, indent uint) {
 	if line2 == "" || line2 == " " {
-		textcolour = pdfErrorColour()
+		textcolour = pdfWarningColour()
 		line2 = nullstring
 	}
 
@@ -633,7 +670,7 @@ func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth ui
 		var text string = lines[line]
 
 		if text == "" || text == " " || text == nullstring {
-			textcolour = pdfErrorColour()
+			textcolour = pdfWarningColour()
 		} else {
 			textcolour = pdfBlack()
 		}
@@ -662,12 +699,13 @@ func pdf_write_list(m pdf.Maroto, lines []string, rowheight float64, colwidth ui
 }
 
 // New style PDFreportwriter sublevel 1 list writer
+/**
 func pdf_write_list_sub1(m pdf.Maroto, lines []string, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	var indent uint = 2
 
 	for line := range lines {
 		if lines[line] == "" || lines[line] == " " {
-			textcolour = pdfErrorColour()
+			textcolour = pdfWarningColour()
 		} else {
 			textcolour = pdfBlack()
 		}
@@ -694,7 +732,7 @@ func pdf_write_list_sub1(m pdf.Maroto, lines []string, rowheight float64, colwid
 		})
 	}
 }
-
+**/
 func pdf_write_creators(m pdf.Maroto, data Yoda18Metadata, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	var ind1 uint = 1
 	// var ind2 uint = 2
@@ -705,11 +743,11 @@ func pdf_write_creators(m pdf.Maroto, data Yoda18Metadata, rowheight float64, co
 		textcolour2 := textcolour
 		if GivenName == "" {
 			GivenName = "GivenName"
-			textcolour2 = pdfErrorColour()
+			textcolour2 = pdfWarningColour()
 		}
 		if FamilyName == "" {
 			FamilyName = "FamilyName"
-			textcolour2 = pdfErrorColour()
+			textcolour2 = pdfWarningColour()
 		}
 
 		pdf_write_row(m, fmt.Sprintf("%s %s", GivenName, FamilyName), rowheight, colwidth, consts.Normal, textcolour2)
@@ -718,7 +756,7 @@ func pdf_write_creators(m pdf.Maroto, data Yoda18Metadata, rowheight float64, co
 			text := data.Creator[i].Affiliation[j]
 			if text == "" {
 				text = "Affiliation"
-				textcolour2 = pdfErrorColour()
+				textcolour2 = pdfWarningColour()
 			}
 			pdf_write_row_indent(m, text, rowheight, colwidth, consts.Normal, textcolour2, ind1)
 		}
@@ -741,8 +779,13 @@ func pdf_write_creators(m pdf.Maroto, data Yoda18Metadata, rowheight float64, co
 	}
 }
 
+// write the list of contributors to the PDF if len(contributors) > len(creators) trigger a creator vs. contribtor warning
 func pdf_write_contributors(m pdf.Maroto, data Yoda18Metadata, rowheight float64, colwidth uint, fontstyle consts.Style, textcolour color.Color) {
 	var ind1 uint = 1
+	if len(data.Contributor) >= len(data.Creator) {
+		pdf_write_row(m, "\"INFO: there are more contributors than creators listed, please note that dataset authors should always be listed as creators to get credit for the dataset.\"", rowheight, colwidth, consts.Normal, pdfInfoColour())
+		pdf_write_empty_row(m, rowheight*2, colwidth)
+	}
 	// var ind2 uint = 2
 	pdf_write_row(m, "Contributors", rowheight, colwidth, consts.Bold, pdfBlack())
 	for i := range data.Contributor {
@@ -753,15 +796,15 @@ func pdf_write_contributors(m pdf.Maroto, data Yoda18Metadata, rowheight float64
 		textcolour3 := textcolour
 		if GivenName == "" {
 			GivenName = "GivenName"
-			textcolour2 = pdfErrorColour()
+			textcolour2 = pdfWarningColour()
 		}
 		if FamilyName == "" {
 			FamilyName = "FamilyName"
-			textcolour2 = pdfErrorColour()
+			textcolour2 = pdfWarningColour()
 		}
 		if ContributorType == "" {
 			ContributorType = "ContributorType"
-			textcolour3 = pdfErrorColour()
+			textcolour3 = pdfWarningColour()
 		}
 		pdf_write_row(m, fmt.Sprintf("%s %s", GivenName, FamilyName), rowheight, colwidth, consts.Normal, textcolour2)
 		pdf_write_row_indent(m, ContributorType, rowheight, colwidth, consts.Normal, textcolour3, ind1)
@@ -770,7 +813,7 @@ func pdf_write_contributors(m pdf.Maroto, data Yoda18Metadata, rowheight float64
 			affil := data.Contributor[i].Affiliation[j]
 			if affil == "" {
 				affil = "Affiliation"
-				textcolour2 = pdfErrorColour()
+				textcolour2 = pdfWarningColour()
 			}
 
 			pdf_write_row_indent(m, affil, rowheight, colwidth, consts.Normal, textcolour2, ind1)
@@ -781,11 +824,11 @@ func pdf_write_contributors(m pdf.Maroto, data Yoda18Metadata, rowheight float64
 			textcolour2 := textcolour
 			if text == "" {
 				text = "IdentifierScheme"
-				textcolour2 = pdfErrorColour()
+				textcolour2 = pdfWarningColour()
 			}
 			if text2 == "" {
 				text2 = "Identifier"
-				textcolour2 = pdfErrorColour()
+				textcolour2 = pdfWarningColour()
 			}
 			pdf_write_row_indent(m, fmt.Sprintf("(%s) %s", text, text2),
 				rowheight, colwidth, consts.Normal, textcolour2, ind1)
@@ -809,7 +852,7 @@ func pdf_write_related(m pdf.Maroto, data Yoda18Metadata, rowheight float64, col
 		reltype := data.RelatedDatapackage[i].RelationType
 		if reltype == "" {
 			reltype = "RelationType"
-			textcolour2 = pdfErrorColour()
+			textcolour2 = pdfWarningColour()
 		}
 		pdf_write_row(m, reltype, rowheight, colwidth, consts.Normal, textcolour2)
 		textcolour3 := textcolour
@@ -817,11 +860,11 @@ func pdf_write_related(m pdf.Maroto, data Yoda18Metadata, rowheight float64, col
 		text2 := data.RelatedDatapackage[i].PersistentIdentifier.Identifier
 		if text == "" {
 			text = "IdentifierSchema"
-			textcolour3 = pdfErrorColour()
+			textcolour3 = pdfWarningColour()
 		}
 		if text2 == "" {
 			text2 = "Identifier"
-			textcolour3 = pdfErrorColour()
+			textcolour3 = pdfWarningColour()
 		}
 		pdf_write_row_indent(m, "("+text+") "+text2, rowheight, colwidth, consts.Normal, textcolour3, 1)
 
@@ -829,7 +872,7 @@ func pdf_write_related(m pdf.Maroto, data Yoda18Metadata, rowheight float64, col
 		title := data.RelatedDatapackage[i].Title
 		if title == "" {
 			title = "Title"
-			textcolour4 = pdfErrorColour()
+			textcolour4 = pdfWarningColour()
 		}
 		pdf_write_row_indent(m, title, rowheight, colwidth, consts.Normal, textcolour4, 1)
 	}
